@@ -19,3 +19,6 @@ Business rules:
   3. All the stores have their pricelists, based on the cars available, which are being updated when necessary (usually twice a year)
   4. One member of staff can work in just one store.
   5. Clients can get various types of discounts, but they may also be extra charged if they take certain actions (such as crossing the border, damaging the car, not           returning a vehicle with full tank ect.). Clients can also choose to have different types of insurances. 
+
+
+bp_tim_68	writer	ItjYs8WD4VajT56A
