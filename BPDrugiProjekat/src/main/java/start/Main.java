@@ -9,6 +9,6 @@ public class Main {
         MainFrame mainFrame = MainFrame.getInstance();
         mainFrame.setAppCore(appCore);
 
-        appCore.readDataFromTable("departments");
+        //appCore.readDataFromTable("departments");
     }
 }

@@ -26,11 +26,27 @@ public class MainFrame extends JFrame {
     public void initialise(){
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setMinimumSize(new Dimension(1000, 700));
+        setLayout(new BorderLayout());
 
+
+        JTextArea textArea = new JTextArea(20, 50);
+        JButton button = new JButton("Submit");
         table = new JTable();
-        table.setPreferredScrollableViewportSize(new Dimension(500, 350));
-        table.setFillsViewportHeight(true);
-        this.add(new JScrollPane(table));
+        JScrollPane scrollPane = new JScrollPane(table);
+
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(button);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        add(mainPanel, BorderLayout.CENTER);
+        add(textArea, BorderLayout.NORTH);
+
+        add(scrollPane, BorderLayout.SOUTH);
 
         this.pack();
         this.setLocationRelativeTo(null);
