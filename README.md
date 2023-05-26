@@ -2,7 +2,7 @@
 
 
 Server:         http://134.209.239.154:8080/sql.php?server=1&db=bp_tim_68&table=VEHICLE&pos=0 
-Kredencijali:   bp_tim_68	ItjYs8WD4VajT56A	
+Kredencijali:   DataBase: bp_tim_68	     Username: writer      Password: ItjYs8WD4VajT56A	
 
 
 "Rent-a-Car
