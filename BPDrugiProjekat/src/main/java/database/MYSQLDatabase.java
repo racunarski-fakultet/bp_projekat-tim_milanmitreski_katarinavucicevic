@@ -17,10 +17,10 @@ public class MYSQLDatabase implements DataBase{
     }
 
     private void initConnection() throws SQLException {
-        String ip = (String) settings.getParameter("");
-        String database = (String) settings.getParameter("");
-        String username = (String) settings.getParameter("");
-        String password = (String) settings.getParameter("");
+        String ip = (String) settings.getParameter("134.209.239.154");
+        String database = (String) settings.getParameter("bp_tim_68");
+        String username = (String) settings.getParameter("writer");
+        String password = (String) settings.getParameter("ItjYs8WD4VajT56A");
         connection = DriverManager.getConnection("jdbc:mysql://"+ip+"/"+database,username,password);
     }
 

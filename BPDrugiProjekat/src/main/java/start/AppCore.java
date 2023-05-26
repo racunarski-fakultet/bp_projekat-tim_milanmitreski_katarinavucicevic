@@ -22,10 +22,10 @@ public class AppCore {
 
     private Settings initSettings(){
         Settings settingsImpl = new SettingsImplementation();
-        settingsImpl.addParameter("", Constants.MYSQL_IP);
-        settingsImpl.addParameter("", Constants.MYSQL_DATABASE);
-        settingsImpl.addParameter("", Constants.MYSQL_USERNAME);
-        settingsImpl.addParameter("", Constants.MYSQL_PASSWORD);
+        settingsImpl.addParameter("134.209.239.154", Constants.MYSQL_IP);
+        settingsImpl.addParameter("bp_tim_68", Constants.MYSQL_DATABASE);
+        settingsImpl.addParameter("writer", Constants.MYSQL_USERNAME);
+        settingsImpl.addParameter("ItjYs8WD4VajT56A", Constants.MYSQL_PASSWORD);
         return settingsImpl;
     }
 
