@@ -27,4 +27,12 @@ public class Row {
     public void setFields(Map<String, Object> fields) {
         this.fields = fields;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
