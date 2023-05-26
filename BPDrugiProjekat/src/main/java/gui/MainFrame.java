@@ -1,4 +1,4 @@
-package view;
+package gui;
 
 import start.AppCore;
 

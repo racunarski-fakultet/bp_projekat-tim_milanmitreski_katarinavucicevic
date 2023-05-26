@@ -1,6 +1,6 @@
 package start;
 
-import view.MainFrame;
+import gui.MainFrame;
 
 public class Main {
 
