@@ -1,9 +1,12 @@
 package gui;
 
+import gui.queryPanel.FilterTablePanel;
 import start.AppCore;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
 
@@ -47,6 +50,13 @@ public class MainFrame extends JFrame {
         add(textArea, BorderLayout.NORTH);
 
         add(scrollPane, BorderLayout.SOUTH);
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new FilterTablePanel();
+            }
+        });
 
         this.pack();
         this.setLocationRelativeTo(null);

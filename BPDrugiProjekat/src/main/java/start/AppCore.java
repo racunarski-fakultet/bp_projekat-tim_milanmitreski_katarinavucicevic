@@ -1,6 +1,5 @@
 package start;
 
-import database.Query;
 import database.SQL.SQLQuery;
 import database.mongo.MongoConnection;
 import database.settings.Settings;
@@ -13,13 +12,11 @@ public class AppCore {
     private TableModel tableModel;
     private MongoConnection mongoConnection;
     private Settings settings;
-    private SQLQuery query;
 
     public AppCore() {
         this.tableModel = new TableModel();
         this.settings = initSettings();
         this.mongoConnection = new MongoConnection(this.settings);
-
     }
 
     private Settings initSettings(){
@@ -31,9 +28,8 @@ public class AppCore {
         return settingsImpl;
     }
 
-    public void readDataFromTable(String fromTable){
-        tableModel.setRows(query.saveResultSet(fromTable));
-        //tableModel.setRows(this.dataBase.runBase(fromTable));
+    public void readDataFromTable(String fromTable){   // poziva se u mainu; to ce biti inicijalno ucitavanje podataka iz tabele
+        tableModel.setRows(mongoConnection.readData(fromTable));
         // vraca rows (setrows pretvara u vektor)
     }
 

@@ -3,9 +3,11 @@ package database.mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import data.Row;
 import database.settings.Settings;
 import utils.Constants;
 import java.util.Arrays;
+import java.util.List;
 
 public class MongoConnection {
 
@@ -34,5 +36,9 @@ public class MongoConnection {
 
     public static void closeConnection(){
         mongoClient.close();
+    }
+
+    public List<Row> readData(String fromTable){
+        return null;
     }
 }

@@ -14,7 +14,7 @@ public class SQLQuery implements Query {
 
 
     public void runQuery(String from){
-
+                                                                              // objasnjenje za ovu i metodu ispod
         String query = "SELECT * FROM" + from;                                // query se pise isto (from ce biti departments u njenom primeru)
         try {                                                                 // resultset zivi samo dok je otvorena konekcija,
             rs = connection.createStatement().executeQuery(query);            // zato moramo da kopiramo redove iz resultseta (klasa row)
@@ -25,7 +25,7 @@ public class SQLQuery implements Query {
     }
 
 
-    public List<Row> saveResultSet(String fromTable) {
+    public List<Row> saveResultSet(String fromTable) {      /// kad se uradi query, ovde se cuvaju ti (filtrirani) podaci koji ce se prikazati
 
         runQuery(fromTable);
 
