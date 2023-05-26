@@ -8,11 +8,13 @@ import java.util.Vector;
 
 public class TableModel extends DefaultTableModel {
 
+    /// konvertuje redove u vektore, kako bi bio kompatibilan sa JTable
     private List<Row> rows;
 
     private void updateModel(){
 
-        int columnCount = rows.get(0).getFields().keySet().size();
+        int columnCount = rows.get(0).getFields().keySet().size();  // koliko kolona imamo
+                                                                    // keyset - nazivi kolona
 
         Vector columnVector = DefaultTableModel.convertToVector(rows.get(0).getFields().keySet().toArray());
         Vector dataVector = new Vector(columnCount);

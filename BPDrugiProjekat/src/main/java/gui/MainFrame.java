@@ -9,7 +9,7 @@ public class MainFrame extends JFrame {
 
     private static MainFrame instance = null;
     private AppCore appCore;
-    private JTable table;
+    private JTable table;  //njegov model je TableModel, koji se definise preko vektora
 
     private MainFrame(){
 
