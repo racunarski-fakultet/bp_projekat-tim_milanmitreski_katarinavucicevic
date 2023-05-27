@@ -64,5 +64,6 @@ public class SQLParser implements Parser {
             // Implementacija sintaksnog analizatora
             tokensIterator.next();
         }
+        return false;
     }
 }
