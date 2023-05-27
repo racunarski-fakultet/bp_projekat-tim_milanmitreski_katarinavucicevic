@@ -11,14 +11,14 @@ import java.util.List;
 
 public class MongoConnection {
 
-    private Settings settings;
+    private static Settings settings;
     private static MongoClient mongoClient;
 
     public MongoConnection(Settings settings) {
         this.settings = settings;
     }
 
-    public MongoClient getConnection(){
+    public static MongoClient getConnection(){
 
         String ip = (String) settings.getParameter(Constants.IP);
         String userName = (String) settings.getParameter(Constants.USERNAME);
@@ -36,7 +36,7 @@ public class MongoConnection {
 
     public static void closeConnection(){
         mongoClient.close();
-    }
+    }  // svaki piut kad pokrenem query
 
     public List<Row> readData(String fromTable){
         return null;

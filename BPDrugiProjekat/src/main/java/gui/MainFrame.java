@@ -33,8 +33,8 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
 
 
-        JTextArea textArea = new JTextArea(20, 50);
-        JButton button = new JButton("Submit");
+        JTextArea textArea = new JTextArea(20, 50);  /// staviti jedan panel iza da izgleda lepo
+        JButton button = new JButton("Run");
         table = new JTable();
         JScrollPane scrollPane = new JScrollPane(table);
 

@@ -14,8 +14,8 @@ public class FilterTablePanel extends JFrame {
 
     public FilterTablePanel() {
 
-        String fromTable = "";   /// these model things, are not going to be here, in view
-        resultSet = query.saveResultSet(fromTable);   /// this is just a representatation of an idea
+        //String fromTable = "";   /// these model things, are not going to be here, in view
+        //resultSet = query.saveResultSet(fromTable);   /// this is just a representatation of an idea
 
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

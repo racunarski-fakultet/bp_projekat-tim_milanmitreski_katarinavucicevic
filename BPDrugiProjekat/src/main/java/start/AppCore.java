@@ -1,6 +1,5 @@
 package start;
 
-import database.SQL.SQLQuery;
 import database.mongo.MongoConnection;
 import database.settings.Settings;
 import database.settings.SettingsImplementation;
@@ -22,14 +21,15 @@ public class AppCore {
     private Settings initSettings(){
         Settings settingsImpl = new SettingsImplementation();
         settingsImpl.addParameter("134.209.239.154", Constants.IP);
-        settingsImpl.addParameter("bp_tim_68", Constants.DATABASE);
+        settingsImpl.addParameter("bp_tim68", Constants.DATABASE);
         settingsImpl.addParameter("writer", Constants.USERNAME);
         settingsImpl.addParameter("ItjYs8WD4VajT56A", Constants.PASSWORD);
         return settingsImpl;
     }
 
     public void readDataFromTable(String fromTable){   // poziva se u mainu; to ce biti inicijalno ucitavanje podataka iz tabele
-        tableModel.setRows(mongoConnection.readData(fromTable));
+        tableModel.setRows(mongoConnection.readData(fromTable));   /// ne moram da inicijalizujem podatka
+
         // vraca rows (setrows pretvara u vektor)
     }
 
