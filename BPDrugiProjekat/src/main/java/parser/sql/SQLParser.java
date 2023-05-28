@@ -14,7 +14,7 @@ public class SQLParser implements Parser {
         return null;
     }
 
-    /*  GRAMATIKA ZA PREPOZNAVANJE - Treba je osloboditi leve rekurzije i levo faktorisanih pravila
+    /*  GRAMATIKA ZA PREPOZNAVANJE SQL UPITA - Treba je osloboditi leve rekurzije i levo faktorisanih pravila
         Query -> SELECT ColumnList FROM Table Clauses
         ColumnList -> Column, ColumnList
                     | Column
@@ -32,15 +32,20 @@ public class SQLParser implements Parser {
                      | e
         ConditionList -> Condition LogicalOperator ConditionList
                        | Condition
-        Condition -> TABLECOLUMN BETWEEN NUMBER AND NUMBER
-                   | TABLECOLUMN = (Query)
-                   | TABLECOLUMN RELATION NUMBER
-                   | TABLECOLUMN LIKE STRING
-        ArithmeticOperator -> >=
-                            | >
-                            | <=
-                            | <
-                            | =
+        Condition -> TABLECOLUMN BETWEEN ConditionElement AND ConditionElement
+                   | TABLECOLUMN = ConditionElement
+                   | TABLECOLUMN Relation ConditionElement
+                   | TABLECOLUMN IN ConditionElement
+                   | TABLECOLUMN NOT IN ConditionElement
+                   | TABLECOLUMN LIKE ConditionElement
+        ConditionElement -> (Query)
+                         -> (Values)
+                         -> NUMBER
+                         -> STRING
+        Relation -> >=
+                  | >
+                  | <=
+                  | <
         LogicalOperator -> AND
                          | OR
         GroupColumnList -> TABLECOLUMN, GroupColumnList

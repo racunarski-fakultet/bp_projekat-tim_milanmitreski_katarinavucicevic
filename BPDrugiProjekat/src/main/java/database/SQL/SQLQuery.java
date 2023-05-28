@@ -11,6 +11,7 @@ public class SQLQuery implements Query {
 
     private Connection connection;
     private ResultSet rs;
+    private List<SQLClause> clauses;
 
 
     public void runQuery(String from){
@@ -56,5 +57,9 @@ public class SQLQuery implements Query {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    public void addClause(SQLClause clause) {
+        this.clauses.add(clause);
     }
 }
