@@ -1,9 +1,9 @@
 package database.SQL;
 
-public abstract class WhereCondition {
+public abstract class WGCondition {
     private Column conditionColumn;
 
-    public WhereCondition(Column conditionColumn) {
+    public WGCondition(Column conditionColumn) {
         this.conditionColumn = conditionColumn;
     }
 

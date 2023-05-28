@@ -3,7 +3,7 @@ package database.SQL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InCondition extends WhereCondition{
+public class InCondition extends WGCondition {
     public List<Object> values;
     public boolean isNot;
     public InCondition(Column conditionColumn, boolean isNot) {

@@ -1,20 +1,22 @@
 package database.SQL;
 
-public class BetweenCondition extends WhereCondition{
-    private int leftBound;
-    private int rightBound;
+import java.util.concurrent.locks.Condition;
 
-    public BetweenCondition(Column conditionColumn, int leftBound, int rightBound) {
+public class BetweenCondition extends WGCondition {
+    private Object leftBound;
+    private Object rightBound;
+
+    public BetweenCondition(Column conditionColumn, Object leftBound, Object rightBound) {
         super(conditionColumn);
         this.leftBound = leftBound;
         this.rightBound = rightBound;
     }
 
-    public int getLeftBound() {
+    public Object getLeftBound() {
         return leftBound;
     }
 
-    public int getRightBound() {
+    public Object getRightBound() {
         return rightBound;
     }
 }

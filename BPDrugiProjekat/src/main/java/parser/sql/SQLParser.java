@@ -18,7 +18,7 @@ public class SQLParser implements Parser {
         Query -> SELECT ColumnList FROM Table Clauses
         ColumnList -> Column, ColumnList
                     | Column
-        Column -> Aggregacy(TABLECOLUMN)
+        Column -> Aggregate(TABLECOLUMN)
                 | TABLECOLUMN
         Table -> TABLE Join
         Join -> JOIN TABLE JoinCondition
@@ -33,7 +33,6 @@ public class SQLParser implements Parser {
         ConditionList -> Condition LogicalOperator ConditionList
                        | Condition
         Condition -> TABLECOLUMN BETWEEN ConditionElement AND ConditionElement
-                   | TABLECOLUMN = ConditionElement
                    | TABLECOLUMN Relation ConditionElement
                    | TABLECOLUMN IN ConditionElement
                    | TABLECOLUMN NOT IN ConditionElement
@@ -46,7 +45,7 @@ public class SQLParser implements Parser {
                   | >
                   | <=
                   | <
-        LogicalOperator -> AND
+        LogicalOperator -> AND ----------- da li treba prioritet razlikovati???? (zakomplikovace gramatiku ali ne previse)
                          | OR
         GroupColumnList -> TABLECOLUMN, GroupColumnList
                          | TABLECOLUMN
