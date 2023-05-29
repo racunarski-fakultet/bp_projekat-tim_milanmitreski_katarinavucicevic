@@ -54,6 +54,7 @@ public class MainFrame extends JFrame {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                appCore.getParser().parse(textArea.getText());
                 new FilterTablePanel();
             }
         });

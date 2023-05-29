@@ -4,6 +4,8 @@ import database.mongo.MongoConnection;
 import database.settings.Settings;
 import database.settings.SettingsImplementation;
 import gui.table.TableModel;
+import parser.Parser;
+import parser.sql.SQLParser;
 import utils.Constants;
 
 public class AppCore {
@@ -11,11 +13,13 @@ public class AppCore {
     private TableModel tableModel;
     private MongoConnection mongoConnection;
     private Settings settings;
+    private Parser parser;
 
     public AppCore() {
         this.tableModel = new TableModel();
         this.settings = initSettings();
         this.mongoConnection = new MongoConnection(this.settings);
+        this.parser = new SQLParser();
     }
 
     private Settings initSettings(){
@@ -35,5 +39,9 @@ public class AppCore {
 
     public TableModel getTableModel() {
         return tableModel;
+    }
+
+    public Parser getParser() {
+        return parser;
     }
 }

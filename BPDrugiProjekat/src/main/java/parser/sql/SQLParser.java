@@ -1,69 +1,169 @@
 package parser.sql;
 
-import database.SQL.SQLQuery;
+import database.SQL.*;
 import parser.Parser;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class SQLParser implements Parser {
 
     @Override
     public SQLQuery parse(String sQuery) {
-        List<String> tokens = List.of(sQuery.split(" "));
-        return null;
+        String sQueryLowerCase = sQuery.toLowerCase();
+        List<String> tokens = List.of(sQueryLowerCase.split("[\\s]+"));
+        ListIterator<String> stringIterator = tokens.listIterator();
+        SQLQuery query = new SQLQuery();
+        String next;
+        Tokens token;
+        // Pocinjemo sa SELECT
+        if(stringIterator.hasNext() && yylex(stringIterator.next()) == Tokens.SELECT) {
+            SelectClause selectClause = new SelectClause(query);
+            while(stringIterator.hasNext()) {
+                next = stringIterator.next();
+                token = yylex(next);
+                if(token == Tokens.AGGREGATE) {
+                    String[] aggregateFunction = next.split("[(,)]");
+                    Column c = new Column(aggregateFunction[1],aggregateFunction[0]);
+                    selectClause.addColumn(c);
+                } else if(token == Tokens.TABLECOLUMN) {
+                    Column c = new Column(next);
+                    selectClause.addColumn(c);
+                } else {
+                    stringIterator.previous();
+                    break;
+                }
+            }
+        } else {
+            // ERROR
+        }
+
+        if(stringIterator.hasNext() && yylex(stringIterator.next()) == Tokens.FROM) {
+            next = stringIterator.next();
+            token = yylex(next);
+            FromClause fromClause = new FromClause(query);
+            if(token == Tokens.TABLE) {
+                Table table = new Table(next);
+                fromClause.setTable(table);
+            } else {
+                // ERROR
+            }
+            while(stringIterator.hasNext() && yylex(stringIterator.next()) == Tokens.JOIN) {
+                next = stringIterator.next();
+                token = yylex(next);
+                if(token == Tokens.TABLE) {
+                    Table table = new Table(next);
+                    next = stringIterator.next();
+                    token = yylex(next);
+                    if(token == Tokens.USING) {
+                        next = stringIterator.next();
+                        token = yylex(next);
+                        if(token == Tokens.USING_CONDITION) {
+                            JoinCondition joinCondition = new JoinCondition(table, new Column(next.replaceAll("[()]", "")));
+                            fromClause.addJoin(joinCondition);
+                        } else {
+                            // ERROR
+                        }
+                    } else if(token == Tokens.ON) {
+                        next = stringIterator.next();
+                        token = yylex(next);
+                        if(token == Tokens.ON_CONDITION) {
+                            String[] columns = next.split("[(=)]");
+                            Column conditionColumn = new Column(columns[0]);
+                            Column conditionColumnOn = new Column(columns[1]);
+                            JoinCondition joinCondition = new JoinCondition(table, conditionColumn, conditionColumnOn);
+                            fromClause.addJoin(joinCondition);
+                        } else {
+                            // ERROR
+                        }
+                    } else {
+                        // ERROR
+                    }
+                } else {
+                    // ERROR
+                }
+            }
+            stringIterator.previous();
+        }
+
+        if(stringIterator.hasNext() && yylex(stringIterator.next()) == Tokens.WHERE) {
+            // WHERE
+        }
+        if(stringIterator.hasNext() && yylex(stringIterator.next()) == Tokens.GROUP) {
+            // GROUP
+        }
+        if(stringIterator.hasNext() && yylex(stringIterator.next()) == Tokens.ORDER) {
+            // ORDER
+        }
+        System.out.println(query);
+        return query;
     }
 
-    /*  GRAMATIKA ZA PREPOZNAVANJE - Treba je osloboditi leve rekurzije i levo faktorisanih pravila
-        Query -> SELECT ColumnList FROM Table Clauses
-        ColumnList -> Column, ColumnList
-                    | Column
-        Column -> Aggregacy(TABLECOLUMN)
-                | TABLECOLUMN
-        Table -> TABLE Join
-        Join -> JOIN TABLE JoinCondition
-              | e
-        JoinCondition -> ON (TABLECOLUMN=TABLECOLUMN)
-                       | USING (TABLECOLUMN)
-        Clauses -> WhereClause GroupClause OrderClause
-        WhereClause -> WHERE ConditionList
-                     | e
-        GroupClause -> GROUP BY GroupColumnList HAVING ConditionList
-                     | e
-        ConditionList -> Condition LogicalOperator ConditionList
-                       | Condition
-        Condition -> TABLECOLUMN BETWEEN NUMBER AND NUMBER
-                   | TABLECOLUMN = (Query)
-                   | TABLECOLUMN RELATION NUMBER
-                   | TABLECOLUMN LIKE STRING
-        ArithmeticOperator -> >=
-                            | >
-                            | <=
-                            | <
-                            | =
-        LogicalOperator -> AND
-                         | OR
-        GroupColumnList -> TABLECOLUMN, GroupColumnList
-                         | TABLECOLUMN
-        OrderClause -> ORDER BY Column Option
-                     | e
-        Option -> ASC
-                | DESC
-     */
-
-    private boolean check(List<String> tokens) {
-        /*
-         *  Ideja je napisati gramatiku koja prepoznaje SQL upite. Tokom prepoznavanja, ideja je da se formiraju delovi upita
-         *  npr. SELECT department_id FROM hr.departments WHERE department_name LIKE 'S%' se rasclani na:
-         *  SelectClause (List<Column> = [department_id])
-         *  FromClause (Table = hr.departments; hasJoin = false; JoinTable = null; JoinCondition = null
-         *  WhereClause (Condition = (Column=department_name; ConditionType=LIKE; Values = ['S%']))
-         */
-        Iterator<String> tokensIterator = tokens.iterator();
-        while(tokensIterator.hasNext()) {
-            // Implementacija sintaksnog analizatora
-            tokensIterator.next();
-        }
-        return false;
+    private Tokens yylex(String next) {
+        String lex = next.replaceAll(",$","");
+        if(lex.matches("select"))
+            return Tokens.SELECT;
+        else if(lex.matches("from"))
+            return Tokens.FROM;
+        else if(lex.matches("join"))
+            return Tokens.JOIN;
+        else if(lex.matches("on"))
+            return Tokens.ON;
+        else if(lex.matches("using"))
+            return Tokens.USING;
+        else if(lex.matches("where"))
+            return Tokens.WHERE;
+        else if(lex.matches("group"))
+            return Tokens.GROUP;
+        else if(lex.matches("by"))
+            return Tokens.BY;
+        else if(lex.matches("between"))
+            return Tokens.BETWEEN;
+        else if(lex.matches("and"))
+            return Tokens.AND;
+        else if(lex.matches("or"))
+            return Tokens.OR;
+        else if(lex.matches("in"))
+            return Tokens.IN;
+        else if(lex.matches("not"))
+            return Tokens.NOT;
+        else if(lex.matches("like"))
+            return Tokens.LIKE;
+        else if(lex.matches("[0-9]+"))
+            return Tokens.NUMBER;
+        else if(lex.matches("'[^']+'"))
+            return Tokens.STRING;
+        else if(lex.matches("\\([0-9]+(,[0-9]+)*\\)") || lex.matches("\\('[^']+'(,'[^']+')*\\)"))
+            return Tokens.LIST;
+        else if(lex.matches("\\([a-z_]+\\)") || lex.matches("\\([a-z_]+\\.[a-z_]+\\.[a-z_]+\\)"))
+            return Tokens.USING_CONDITION;
+        else if(lex.matches("\\([a-z_]+=[a-z_]+\\)") || lex.matches("\\([a-z_]+\\.[a-z_]+\\.[a-z_]+=[a-z_]+\\.[a-z_]+\\.[a-z_]+\\)"))
+            return Tokens.ON_CONDITION;
+        else if(lex.matches(">"))
+            return Tokens.GREATER;
+        else if(lex.matches(">="))
+            return Tokens.GREATER_EQUAL;
+        else if(lex.matches("<"))
+            return Tokens.LESS;
+        else if(lex.matches("<="))
+            return Tokens.LESS_EQUAL;
+        else if(lex.matches("="))
+            return Tokens.EQUALS;
+        else if(lex.matches("having"))
+            return Tokens.HAVING;
+        else if(lex.matches("order"))
+            return Tokens.ORDER;
+        else if(lex.matches("asc"))
+            return Tokens.ASC;
+        else if(lex.matches("desc"))
+            return Tokens.DESC;
+        else if(lex.matches("[a-z_]+\\([a-z_]+\\)"))
+            return Tokens.AGGREGATE;
+        else if(lex.matches("[a-z_\\*]+") || lex.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))
+            return Tokens.TABLECOLUMN;
+        else if(lex.matches("[a-z_]+\\.[a-z_]+"))
+            return Tokens.TABLE;
+        // ERROR
+        return null;
     }
 }
