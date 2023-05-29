@@ -18,4 +18,13 @@ public class SelectClause extends SQLClause {
     public List<Column> getColumns() {
         return columns;
     }
+
+    @Override
+    public String toString() {
+        String result = "SELECT ";
+        for(Column column: columns) {
+            result += column.getColumnName() + " ";
+        }
+        return result;
+    }
 }

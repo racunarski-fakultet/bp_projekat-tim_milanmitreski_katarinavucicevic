@@ -5,6 +5,7 @@ import database.Query;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class SQLQuery implements Query {
@@ -13,6 +14,9 @@ public class SQLQuery implements Query {
     private ResultSet rs;
     private List<SQLClause> clauses;
 
+    public SQLQuery() {
+        this.clauses = new LinkedList<>();
+    }
 
     public void runQuery(String from){
                                                                               // objasnjenje za ovu i metodu ispod
@@ -61,5 +65,14 @@ public class SQLQuery implements Query {
 
     public void addClause(SQLClause clause) {
         this.clauses.add(clause);
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+        for(SQLClause clause : clauses) {
+            result += clause.toString();
+        }
+        return result;
     }
 }
