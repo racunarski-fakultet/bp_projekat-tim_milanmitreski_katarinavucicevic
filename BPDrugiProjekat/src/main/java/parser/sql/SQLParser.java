@@ -81,10 +81,10 @@ public class SQLParser implements Parser {
 
         if(stringIterator.hasNext() && stringIterator.next().equals("where")) {
             // WHERE
-        }
+        } else { stringIterator.previous(); }
         if(stringIterator.hasNext() && stringIterator.next().equals("group")) {
             // GROUP
-        }
+        } { stringIterator.previous(); }
         if(stringIterator.hasNext() && stringIterator.next().equals("order")) {
             if(stringIterator.next().equals("by")) {
                 String next = stringIterator.next();
@@ -103,6 +103,7 @@ public class SQLParser implements Parser {
                 System.out.println("ERROR");
             }
         }
+        System.out.println("SUCCESS");
         return query;
     }
         /*
