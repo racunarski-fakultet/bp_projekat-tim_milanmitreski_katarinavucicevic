@@ -11,10 +11,10 @@ public class Column {
         this.aggregateFunction = AggregateFunction.NONE;
     }
 
-    public Column(String columnName, AggregateFunction aggregateFunction) {
+    public Column(String columnName, String aggregateFunction) {
         this.columnName = columnName;
         this.isAggregate = true;
-        this.aggregateFunction = aggregateFunction;
+        this.aggregateFunction = AggregateFunction.getAggregateFunction(aggregateFunction);
     }
 
     public boolean isAggregate() {
