@@ -3,9 +3,17 @@ package database.mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import data.Row;
 import database.settings.Settings;
+import gui.MainFrame;
+import gui.table.TableModel;
+import org.bson.Document;
 import utils.Constants;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +21,7 @@ public class MongoConnection {
 
     private static Settings settings;
     private static MongoClient mongoClient;
+
 
     public MongoConnection(Settings settings) {
         this.settings = settings;
@@ -38,7 +47,37 @@ public class MongoConnection {
         mongoClient.close();
     }  // svaki piut kad pokrenem query
 
-    public List<Row> readData(String fromTable){
-        return null;
+    public void readData(String fromTable){   /// List<Row> povratni tip
+
+        getConnection();
+        MongoDatabase database = mongoClient.getDatabase("bp_tim68");
+
+
+        MongoCollection<Document> collection = database.getCollection("departments");
+
+
+        MongoCursor<Document> cursor = collection.find().iterator();
+        List<Document> documents = new ArrayList<>();
+
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            documents.add(document);
+        }
+
+        cursor.close();
+
+        String[] columnNames = {"Column 1", "Column 2", "Column 3"}; // Replace with your actual column names
+
+
+        for (Document document : documents) {
+            Object[] rowData = {
+                    document.get(fromTable),
+            }; // Replace field1, field2, field3 with the actual fields in your documents
+
+            MainFrame.getInstance().getAppCore().getTableModel().addRow(rowData); // treba da se zove setRows i da se sve smesta u te rows, ovo sve se ne desava ovde
+        }
+
+
+        closeConnection();
     }
 }

@@ -27,9 +27,9 @@ public class AppCore {
         return settingsImpl;
     }
 
-    public void readDataFromTable(String fromTable){   // poziva se u mainu; to ce biti inicijalno ucitavanje podataka iz tabele
-        tableModel.setRows(mongoConnection.readData(fromTable));   /// ne moram da inicijalizujem podatka
-
+    public void initialiseData(String fromTable){   // poziva se u mainu; to ce biti inicijalno ucitavanje podataka iz tabele
+        //tableModel.setRows(mongoConnection.readData(fromTable));   /// ne moram da inicijalizujem podatka
+        mongoConnection.readData(fromTable);
         // vraca rows (setrows pretvara u vektor)
     }
 

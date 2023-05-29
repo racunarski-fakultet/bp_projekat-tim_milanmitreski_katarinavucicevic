@@ -69,4 +69,12 @@ public class MainFrame extends JFrame {
         this.appCore = appCore;
         this.table.setModel(appCore.getTableModel());
     }
+
+    public JTable getTable() {
+        return table;
+    }
+
+    public AppCore getAppCore() {
+        return appCore;
+    }
 }
