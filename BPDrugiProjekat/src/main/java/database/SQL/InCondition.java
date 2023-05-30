@@ -1,22 +1,23 @@
 package database.SQL;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InCondition extends WGCondition {
-    public List<Object> values;
-    public boolean isNot;
-    public InCondition(Column conditionColumn, boolean isNot) {
+    private List<Object> values;
+    private boolean isSubQuery;
+    public InCondition(Column conditionColumn, boolean isSubQuery) {
         super(conditionColumn);
-        this.isNot = isNot;
-        this.values = new ArrayList<>();
+        this.isSubQuery = isSubQuery;
+        this.values = new LinkedList<>();
     }
 
-    public boolean isNot() {
-        return isNot;
+    public boolean isSubQuery() {
+        return isSubQuery;
     }
 
-    public List<Object> getValues() {
-        return values;
+    public void addValue(Object value) {
+        this.values.add(value);
     }
 }

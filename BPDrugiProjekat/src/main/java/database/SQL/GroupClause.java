@@ -7,23 +7,25 @@ public class GroupClause extends SQLClause{
     private List<Column> groupColumns;
     private boolean hasHaving;
     private List<WGCondition> conditionList;
+    private List<LogicalOperator> logicalOperators;
 
-    public GroupClause(SQLQuery query, boolean hasHaving) {
+    public GroupClause(SQLQuery query) {
         super(query);
         this.groupColumns = new LinkedList<>();
-        this.hasHaving = hasHaving;
-        if(this.hasHaving)
-            this.conditionList = new LinkedList<>();
-        else
-            this.conditionList = null;
+        this.conditionList = new LinkedList<>();
+        this.logicalOperators = new LinkedList<>();
     }
 
     public void addGroupColumn(Column column) {
-        // OVDE TREBA GRESKA AKO KOLONA IMA FUNKCIJU AGREGACIJE
         this.groupColumns.add(column);
     }
-
     public void addCondition(WGCondition condition) {
         this.conditionList.add(condition);
+    }
+
+    public void addLogicalOperator(String logicalOperator) {this.logicalOperators.add(LogicalOperator.getLogicalOperator(logicalOperator)); }
+
+    public void setHasHaving(boolean hasHaving) {
+        this.hasHaving = hasHaving;
     }
 }
