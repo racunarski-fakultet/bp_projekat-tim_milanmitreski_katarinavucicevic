@@ -45,6 +45,7 @@ public class SQLParser implements Parser {
                     break;
             }
         }
+        System.out.println(sqlQuery);
         return sqlQuery;
     }
 
@@ -55,7 +56,6 @@ public class SQLParser implements Parser {
             String next = listIterator.next();
             next = next.replaceAll(",", "");
             boolean isKeyword = SQLKeyword.checkKeyword(next);
-            System.out.println(isKeyword);
             if (next.matches("[a-z_]+\\([a-z_]+\\)")) {
                 String[] aggregateFunction = next.split("[(,)]");
                 Column c = new Column(aggregateFunction[1], aggregateFunction[0]);
@@ -79,6 +79,7 @@ public class SQLParser implements Parser {
         if (next.matches("[a-z_]+\\.[a-z_]+")) {
             Table table = new Table(next);
             fromClause.setTable(table);
+            System.out.println(fromClause);
         } else error();
         while (listIterator.hasNext()) {
             if(!listIterator.next().matches("join")) {
@@ -117,7 +118,6 @@ public class SQLParser implements Parser {
         boolean validCondition = false;
         while(listIterator.hasNext()) {
             String next = listIterator.next();
-            System.out.println(next);
             boolean isKeyword = SQLKeyword.checkKeyword(next);
             if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
                 Column c = new Column(next);
@@ -142,7 +142,6 @@ public class SQLParser implements Parser {
                         o2 = parse(ssubQuery);
                     } else if (next.matches("[0-9]+")) {
                         o2 = Integer.valueOf(next);
-                        System.out.println("here");
                     } else error();
                     BetweenCondition betweenCondition = new BetweenCondition(c, o1, o2);
                     whereClause.addCondition(betweenCondition);
@@ -217,7 +216,6 @@ public class SQLParser implements Parser {
                 String next = listIterator.next();
                 next = next.replaceAll(",", "");
                 boolean isKeyword = SQLKeyword.checkKeyword(next);
-                System.out.println(isKeyword);
                 if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
                     Column c = new Column(next);
                     groupClause.addGroupColumn(c);
@@ -234,7 +232,6 @@ public class SQLParser implements Parser {
                 boolean validCondition = false;
                 while(listIterator.hasNext()) {
                     next = listIterator.next();
-                    System.out.println(next);
                     boolean isKeyword = SQLKeyword.checkKeyword(next);
                     if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+") || next.matches("[a-z_]+\\([a-z_]+\\)"))) {
                         Column c;
@@ -265,7 +262,6 @@ public class SQLParser implements Parser {
                                 o2 = parse(ssubQuery);
                             } else if (next.matches("[0-9]+")) {
                                 o2 = Integer.valueOf(next);
-                                System.out.println("here");
                             } else error();
                             BetweenCondition betweenCondition = new BetweenCondition(c, o1, o2);
                             groupClause.addCondition(betweenCondition);

@@ -27,7 +27,12 @@ public class FromClause extends SQLClause {
 
     @Override
     public String toString() {
-        String result = "FROM " + table.getTableName() + " ";
+        String result = "FROM " + table.getTableName();
+        if(hasJoins) {
+            for (JoinCondition joinCondition : joins) {
+                result += joinCondition.toString();
+            }
+        }
         return result;
     }
 }

@@ -9,4 +9,9 @@ public class OrderClause extends SQLClause {
         this.orderColumn = orderColumn;
         this.orderType = OrderType.getOrderType(orderType);
     }
+
+    @Override
+    public String toString() {
+        return "ORDER BY " + orderColumn.getColumnName() + " " + orderType.name();
+    }
 }

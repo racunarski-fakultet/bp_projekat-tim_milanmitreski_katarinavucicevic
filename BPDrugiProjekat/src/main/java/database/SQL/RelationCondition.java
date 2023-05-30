@@ -9,4 +9,9 @@ public class RelationCondition extends WGCondition{
         this.referenceValue = referenceValue;
         this.relationConditionType = RelationConditionType.getRelationConditionType(relationConditionType);
     }
+
+    @Override
+    public String toString() {
+        return getConditionColumn().getColumnName() + " " + relationConditionType.toString() + " " + referenceValue.toString();
+    }
 }

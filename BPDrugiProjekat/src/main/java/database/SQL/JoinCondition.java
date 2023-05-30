@@ -19,4 +19,13 @@ public class JoinCondition {
         this.conditionColumn = conditionColumn;
         this.conditionColumnOn = conditionColumnOn;
     }
+
+    @Override
+    public String toString() {
+        if(joinConditionType == JoinConditionType.ON) {
+            return " JOIN " + joinTable.getTableName() + " ON (" + conditionColumn.getColumnName() + "=" + conditionColumnOn + ")";
+        } else {
+            return " JOIN " + joinTable.getTableName() + " USING (" + conditionColumn.getColumnName() + ")";
+        }
+    }
 }

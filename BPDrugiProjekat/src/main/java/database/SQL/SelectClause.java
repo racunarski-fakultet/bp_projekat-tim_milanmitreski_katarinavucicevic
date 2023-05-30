@@ -23,8 +23,10 @@ public class SelectClause extends SQLClause {
     public String toString() {
         String result = "SELECT ";
         for(Column column: columns) {
-            result += column.getColumnName() + " ";
+            result += column.getColumnName() + ", ";
         }
+        result = result.trim();
+        result = result.replaceAll(",$", "");
         return result;
     }
 }

@@ -69,10 +69,10 @@ public class SQLQuery implements Query {
 
     @Override
     public String toString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for(SQLClause clause : clauses) {
-            result += clause.toString();
+            result.append(clause.toString()).append(" ");
         }
-        return result;
+        return result.toString().trim();
     }
 }

@@ -21,4 +21,22 @@ public enum RelationConditionType {
         else
             return null;
     }
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case E:
+                return "=";
+            case G:
+                return ">";
+            case GE:
+                return ">=";
+            case LE:
+                return "<=";
+            case L:
+                return "<";
+            default:
+                return null;
+        }
+    }
 }

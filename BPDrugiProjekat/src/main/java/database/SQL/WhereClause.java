@@ -3,6 +3,7 @@ package database.SQL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class WhereClause extends SQLClause {
     private List<WGCondition> conditionList;
@@ -18,4 +19,16 @@ public class WhereClause extends SQLClause {
     }
 
     public void addLogicalOperator(String logicalOperator) {this.logicalOperators.add(LogicalOperator.getLogicalOperator(logicalOperator)); }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder("WHERE ");
+        ListIterator<LogicalOperator> logicalOperatorListIterator = logicalOperators.listIterator();
+        for(WGCondition condition : conditionList) {
+            result.append(condition.toString()).append(" ");
+            if(logicalOperatorListIterator.hasNext())
+                result.append(logicalOperatorListIterator.next().name()).append(" ");
+        }
+        return result.toString().trim();
+    }
 }
