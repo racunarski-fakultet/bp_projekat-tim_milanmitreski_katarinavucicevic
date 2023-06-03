@@ -4,9 +4,12 @@ import database.mongo.MongoConnection;
 import database.settings.Settings;
 import database.settings.SettingsImplementation;
 import gui.table.TableModel;
+import message.MessageGenerator;
+import message.MessageGeneratorImplementation;
 import parser.Parser;
 import parser.sql.SQLParser;
 import utils.Constants;
+import validator.Validator;
 
 public class AppCore {
 
@@ -14,12 +17,17 @@ public class AppCore {
     private MongoConnection mongoConnection;
     private Settings settings;
     private Parser parser;
+    private Validator validator;
+    private MessageGenerator messageGenerator;
 
     public AppCore() {
         this.tableModel = new TableModel();
         this.settings = initSettings();
         this.mongoConnection = new MongoConnection(this.settings);
         this.parser = new SQLParser();
+        this.messageGenerator = new MessageGeneratorImplementation();
+        this.validator = new Validator();
+        parser.addSub(validator);
     }
 
     private Settings initSettings(){
@@ -43,5 +51,9 @@ public class AppCore {
 
     public Parser getParser() {
         return parser;
+    }
+
+    public MessageGenerator getMessageGenerator() {
+        return messageGenerator;
     }
 }

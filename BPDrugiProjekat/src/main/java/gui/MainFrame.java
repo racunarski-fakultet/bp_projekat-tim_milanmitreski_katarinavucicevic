@@ -1,6 +1,8 @@
 package gui;
 
 import gui.queryPanel.FilterTablePanel;
+import message.Message;
+import observer.ISubscriber;
 import start.AppCore;
 
 import javax.swing.*;
@@ -8,7 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements ISubscriber {
 
     private static MainFrame instance = null;
     private AppCore appCore;
@@ -70,6 +72,7 @@ public class MainFrame extends JFrame {
     public void setAppCore(AppCore appCore) {
         this.appCore = appCore;
         this.table.setModel(appCore.getTableModel());
+        appCore.getMessageGenerator().addSub(this);
     }
 
     public JTable getTable() {
@@ -78,5 +81,13 @@ public class MainFrame extends JFrame {
 
     public AppCore getAppCore() {
         return appCore;
+    }
+
+    @Override
+    public void update(Object notification) {
+        if(notification instanceof Message) {
+            Message message = (Message) notification;
+            System.out.println(message);
+        }
     }
 }
