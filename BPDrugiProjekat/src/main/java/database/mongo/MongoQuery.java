@@ -3,6 +3,7 @@ package database.mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import database.Query;
+import org.bson.Document;
 
 public class MongoQuery implements Query {   ///executor
 

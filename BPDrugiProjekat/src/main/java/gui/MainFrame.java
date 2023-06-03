@@ -55,6 +55,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 appCore.getParser().parse(textArea.getText());
+                /// INSTANCA VALIDATORA!!!!!!
                 new FilterTablePanel();
             }
         });
