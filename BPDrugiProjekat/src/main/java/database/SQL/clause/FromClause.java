@@ -31,10 +31,11 @@ public class FromClause extends SQLClause {
 
     @Override
     public String toString() {
-        String result = "FROM " + table.getTableName();
+        String result = "FROM " + table.getTableName();   /// null pointer
         if(hasJoins) {
             for (JoinCondition joinCondition : joins) {
-                result += joinCondition.toString();
+                result.concat(joinCondition.toString());
+                //result += joinCondition.toString();
             }
         }
         return result;

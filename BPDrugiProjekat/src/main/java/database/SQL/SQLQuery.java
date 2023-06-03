@@ -60,12 +60,13 @@ public class SQLQuery implements Query {
 
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
 
     public void addClause(SQLClause clause) {
         this.clauses.add(clause);
+    }
+
+    public List<SQLClause> getClauses() {
+        return clauses;
     }
 
     @Override

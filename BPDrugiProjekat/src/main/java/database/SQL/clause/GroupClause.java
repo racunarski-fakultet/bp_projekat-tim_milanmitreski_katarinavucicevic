@@ -33,4 +33,8 @@ public class GroupClause extends SQLClause{
     public void setHasHaving(boolean hasHaving) {
         this.hasHaving = hasHaving;
     }
+
+    public List<Column> getGroupColumns() {
+        return groupColumns;
+    }
 }

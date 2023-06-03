@@ -3,12 +3,17 @@ package parser.sql;
 import database.SQL.*;
 import database.SQL.clause.*;
 import database.SQL.condition.*;
+import observer.IPublisher;
+import observer.ISubscriber;
 import parser.Parser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-public class SQLParser implements Parser {
+public class SQLParser implements Parser, IPublisher {
+
+    private List<ISubscriber> subs = new ArrayList<>();
     @Override
     public SQLQuery parse(String sQuery) {
         String sQueryLowerCase = sQuery.toLowerCase();
@@ -48,6 +53,7 @@ public class SQLParser implements Parser {
             }
         }
         System.out.println(sqlQuery);
+        notify(sqlQuery);
         return sqlQuery;
     }
 
@@ -370,5 +376,23 @@ public class SQLParser implements Parser {
 
     private void error() {
         System.out.println("ERROR");
+    }
+
+    @Override
+    public void addSub(ISubscriber sub) {
+        subs.add(sub);
+    }
+
+    @Override
+    public void removeSub(ISubscriber sub) {
+        subs.remove(sub);
+    }
+
+    @Override
+    public void notify(Object notification) {
+        if(subs == null) return;
+        for(ISubscriber sub : subs){
+            sub.update(notification);
+        }
     }
 }

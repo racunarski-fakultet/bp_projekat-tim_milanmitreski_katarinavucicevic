@@ -34,4 +34,8 @@ public class WhereClause extends SQLClause {
         }
         return result.toString().trim();
     }
+
+    public List<WGCondition> getConditionList() {
+        return conditionList;
+    }
 }
