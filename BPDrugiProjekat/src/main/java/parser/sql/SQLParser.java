@@ -30,7 +30,6 @@ public class SQLParser implements Parser {
         boolean hasFrom = false;
         while (listIterator.hasNext()){
             String token = listIterator.next();
-            System.out.println(token);
             switch (token) {
                 case "select":
                     generateSelectClause(listIterator, sqlQuery);
@@ -58,7 +57,6 @@ public class SQLParser implements Parser {
                     break;
             }
         }
-        System.out.println(sqlQuery);
         notify(sqlQuery);
         return sqlQuery;
     }
@@ -373,7 +371,6 @@ public class SQLParser implements Parser {
             }
             result.append(" ").append(next);
         }
-        System.out.println(result);
         return result.toString();
     }
 

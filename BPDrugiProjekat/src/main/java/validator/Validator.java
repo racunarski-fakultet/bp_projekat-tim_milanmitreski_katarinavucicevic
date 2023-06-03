@@ -27,7 +27,7 @@ public class Validator implements ISubscriber, IPublisher {
             error("FROM clause missing");
             return;
         }
-        if(aggAndGroup()) {
+        if(!aggAndGroup()) {
             error("There are columns which are neither aggregated nor grouped");
             return;
         }
@@ -52,15 +52,29 @@ public class Validator implements ISubscriber, IPublisher {
         return false;
     }
 
+    public boolean hasAgg() {
+        for(Column c : ((SelectClause) query.getClauses().get(0)).getColumns()) {
+            if(c.isAggregate()) return true;
+        }
+        return false;
+    }
+
     public boolean aggAndGroup(){
+        if(!hasAgg()) return true;
+
+        GroupClause groupClause = null;
+        for(SQLClause clause : query.getClauses()) {
+            if(clause instanceof GroupClause) {
+                groupClause = (GroupClause) clause;
+                break;
+            }
+        }
+        if(groupClause == null) return false;
+
         for(Column c : ((SelectClause) query.getClauses().get(0)).getColumns()){
             if(!c.isAggregate()){
-                for(SQLClause clause : query.getClauses()){
-                    if(clause instanceof GroupClause &&
-                        !((GroupClause)clause).getGroupColumns().contains(c)){
-                        return false;
-                    }
-                }
+                if(!groupClause.getGroupColumns().contains(c))
+                    return false;
             }
         }
         return true;

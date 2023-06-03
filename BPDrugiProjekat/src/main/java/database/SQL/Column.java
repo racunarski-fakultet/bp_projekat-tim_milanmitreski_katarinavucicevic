@@ -1,5 +1,7 @@
 package database.SQL;
 
+import java.util.Objects;
+
 public class Column {
     private String columnName;
     private boolean isAggregate;
@@ -28,4 +30,13 @@ public class Column {
     public AggregateFunction getAggregateFunction() {
         return aggregateFunction;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Column column = (Column) o;
+        return isAggregate == column.isAggregate && columnName.equals(column.columnName) && aggregateFunction == column.aggregateFunction;
+    }
+
 }
