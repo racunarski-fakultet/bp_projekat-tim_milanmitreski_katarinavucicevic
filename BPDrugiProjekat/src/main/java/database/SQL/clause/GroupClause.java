@@ -1,4 +1,9 @@
-package database.SQL;
+package database.SQL.clause;
+
+import database.SQL.Column;
+import database.SQL.LogicalOperator;
+import database.SQL.SQLQuery;
+import database.SQL.condition.WGCondition;
 
 import java.util.LinkedList;
 import java.util.List;

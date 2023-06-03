@@ -1,6 +1,8 @@
 package parser.sql;
 
 import database.SQL.*;
+import database.SQL.clause.*;
+import database.SQL.condition.*;
 import parser.Parser;
 
 import java.util.List;

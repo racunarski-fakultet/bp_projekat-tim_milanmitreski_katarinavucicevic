@@ -1,4 +1,8 @@
-package database.SQL;
+package database.SQL.clause;
+
+import database.SQL.Column;
+import database.SQL.OrderType;
+import database.SQL.SQLQuery;
 
 public class OrderClause extends SQLClause {
 

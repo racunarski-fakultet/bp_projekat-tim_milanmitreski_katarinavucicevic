@@ -1,4 +1,6 @@
-package database.SQL;
+package database.SQL.condition;
+
+import database.SQL.Column;
 
 public abstract class WGCondition {
     private Column conditionColumn;

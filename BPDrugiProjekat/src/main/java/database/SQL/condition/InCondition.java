@@ -1,6 +1,7 @@
-package database.SQL;
+package database.SQL.condition;
 
-import java.util.ArrayList;
+import database.SQL.Column;
+
 import java.util.LinkedList;
 import java.util.List;
 

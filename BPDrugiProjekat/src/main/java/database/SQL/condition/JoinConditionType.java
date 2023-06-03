@@ -1,4 +1,4 @@
-package database.SQL;
+package database.SQL.condition;
 
 public enum JoinConditionType {
     ON,

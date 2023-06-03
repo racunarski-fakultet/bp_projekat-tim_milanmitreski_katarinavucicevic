@@ -1,4 +1,6 @@
-package database.SQL;
+package database.SQL.clause;
+
+import database.SQL.SQLQuery;
 
 public abstract class SQLClause {
 

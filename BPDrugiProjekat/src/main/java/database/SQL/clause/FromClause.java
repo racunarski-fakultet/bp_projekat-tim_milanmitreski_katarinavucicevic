@@ -1,4 +1,8 @@
-package database.SQL;
+package database.SQL.clause;
+
+import database.SQL.SQLQuery;
+import database.SQL.Table;
+import database.SQL.condition.JoinCondition;
 
 import java.util.LinkedList;
 import java.util.List;

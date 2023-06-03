@@ -1,4 +1,7 @@
-package database.SQL;
+package database.SQL.condition;
+
+import database.SQL.Column;
+import database.SQL.Table;
 
 public class JoinCondition {
     private JoinConditionType joinConditionType;

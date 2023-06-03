@@ -2,6 +2,7 @@ package database.SQL;
 
 import data.Row;
 import database.Query;
+import database.SQL.clause.SQLClause;
 
 import java.sql.*;
 import java.util.ArrayList;

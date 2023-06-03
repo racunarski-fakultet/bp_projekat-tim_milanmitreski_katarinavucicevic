@@ -1,6 +1,6 @@
-package database.SQL;
+package database.SQL.condition;
 
-import java.util.concurrent.locks.Condition;
+import database.SQL.Column;
 
 public class BetweenCondition extends WGCondition {
     private Object leftBound;
