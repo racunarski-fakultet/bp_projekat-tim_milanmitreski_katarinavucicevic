@@ -1,8 +1,9 @@
 package parser;
 
 import database.Query;
+import observer.IPublisher;
 
-public interface Parser {
+public interface Parser extends IPublisher {
 
     Query parse(String sQuery);
 

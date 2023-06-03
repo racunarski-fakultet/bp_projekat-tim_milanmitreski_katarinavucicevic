@@ -4,6 +4,7 @@ import database.SQL.Column;
 import database.SQL.SQLQuery;
 import database.SQL.clause.*;
 import database.SQL.condition.WGCondition;
+import gui.MainFrame;
 import observer.IPublisher;
 import observer.ISubscriber;
 
@@ -18,29 +19,19 @@ public class Validator implements ISubscriber, IPublisher {
     @Override
     public void update(Object notification) {
         query = (SQLQuery) notification;
-
         if(!containsSelect()){
-            System.out.println("select clause missing");
+            error("SELECT clause missing");
             return;
         }
-
         if(!containsFrom()){
-            System.out.println("from clause missing");
+            error("FROM clause missing");
             return;
         }
-
-        if(aggInWhere()){
-            System.out.println("you can't put aggregate function in where clause");
+        if(aggAndGroup()) {
+            error("There are columns which are neither aggregated nor grouped");
             return;
         }
-
-        if(!aggAndGroup()){
-            System.out.println("there are columns which are neither aggregated nor grouped");
-            return;
-        }
-
         notify(query);
-
     }
 
     public boolean containsSelect(){
@@ -53,7 +44,6 @@ public class Validator implements ISubscriber, IPublisher {
     }
 
     public boolean containsFrom(){
-
         for(SQLClause clause : query.getClauses()){
             if(clause instanceof FromClause){
                 return true;
@@ -62,55 +52,7 @@ public class Validator implements ISubscriber, IPublisher {
         return false;
     }
 
-    public boolean containsWhere(){
-
-        for(SQLClause clause : query.getClauses()){
-            if(clause instanceof WhereClause){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean hasAgg(SQLQuery q){
-
-        int  count = 0;
-        for(Column c : ((SelectClause) q.getClauses().get(0)).getColumns()){
-            if(c.isAggregate()){
-                count++;
-            }
-        }
-        if(count == ((SelectClause) q.getClauses().get(0)).getColumns().size()){
-            return true;
-        }
-
-        return false;
-    } /// uzasno resenje za proveravanje agregacije
-
-    public boolean aggInWhere(){    /// u where ne sme da postoji agregacija
-
-        if(!hasAgg(query)){
-            return false;
-        }
-
-        for(SQLClause clause : query.getClauses()){
-            if(clause instanceof WhereClause){
-                for(WGCondition condition : ((WhereClause) clause).getConditionList()){
-                    if(condition.getConditionColumn().isAggregate()){
-                        return true;   /// aggregate se nalazi u where
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public boolean aggAndGroup(){
-
-        if(!hasAgg(query)){
-            return false;
-        }
-
         for(Column c : ((SelectClause) query.getClauses().get(0)).getColumns()){
             if(!c.isAggregate()){
                 for(SQLClause clause : query.getClauses()){
@@ -121,9 +63,7 @@ public class Validator implements ISubscriber, IPublisher {
                 }
             }
         }
-
         return true;
-
     }
 
     @Override
@@ -141,5 +81,9 @@ public class Validator implements ISubscriber, IPublisher {
         for(ISubscriber s : subs){
             s.update(notification);
         }
+    }
+
+    private void error(String message) {
+        MainFrame.getInstance().getAppCore().getMessageGenerator().getMessage(message);
     }
 }
