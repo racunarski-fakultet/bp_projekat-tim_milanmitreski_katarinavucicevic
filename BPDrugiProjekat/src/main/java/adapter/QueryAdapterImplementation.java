@@ -36,6 +36,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
         convertParameters();
         MongoQuery mongoQuery = new MongoQuery(table);
         map(mongoQuery);
+        System.out.println(mongoQuery);
         mongoQuery.runQuery();
         notify(mongoQuery);
     }
@@ -125,7 +126,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
                             match.append(".").append(condition.getConditionColumn().getColumnName().split("\\.")[2]);
                         } else match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":/^");
                         match.append(((LikeCondition)condition).getReferenceValue().replace("%",".*").replace("_",".").replace("'",""));
-                        match.append("$/");
+                        match.append("$/i");
                     }
                     match.append("},");
                 }
@@ -142,7 +143,6 @@ public class QueryAdapterImplementation implements QueryAdapter {
                 }
             }
         }
-        if(!isSubQuery) whereConverted = null;
         return null;
     }
 
@@ -188,6 +188,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
                 }
                 group.deleteCharAt(group.lastIndexOf(",")).append("}}");
                 groupConverted = Document.parse(group.toString());
+                return;
             }
         }
         groupConverted = null;
@@ -218,7 +219,6 @@ public class QueryAdapterImplementation implements QueryAdapter {
             }
         }
     }
-
     private void convertSelect() {
         SelectClause selectClause = (SelectClause) query.getClauses().get(0);
         StringBuilder json = new StringBuilder("{ $project : {");
@@ -230,7 +230,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     json.append("\"").append(c.getColumnName()).append("\": 1,");
                 }
             } else {
-                json.append("\"$").append(c.getColumnName().split("\\.")[1]).append(".");
+                json.append("\"").append(c.getColumnName().split("\\.")[1]).append(".");
                 if (c.isAggregate()) {
                     json.append(c.getAggregateFunction().name().toLowerCase()).append("_").append(c.getColumnName().split("\\.")[2]).append("\": 1,");
                 } else {
