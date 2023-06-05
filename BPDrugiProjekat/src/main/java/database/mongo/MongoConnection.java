@@ -6,8 +6,10 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import data.Row;
 import database.settings.Settings;
 import gui.MainFrame;
+import gui.table.TableModel;
 import org.bson.Document;
 import utils.Constants;
 
@@ -43,13 +45,14 @@ public class MongoConnection {
         mongoClient.close();
     }  // svaki piut kad pokrenem query
 
-    public void readData(String fromTable){   /// List<Row> povratni tip
+    public List<Row> readData(String fromTable){   /// List<Row> povratni tip
+
+        List<Row> rows = new ArrayList<>();
 
         getConnection();
         MongoDatabase database = mongoClient.getDatabase("bp_tim68");
 
-        MongoCollection<Document> collection = database.getCollection("departments");
-
+        MongoCollection<Document> collection = database.getCollection(fromTable);
 
         MongoCursor<Document> cursor = collection.find().iterator();
         List<Document> documents = new ArrayList<>();
@@ -61,18 +64,21 @@ public class MongoConnection {
 
         cursor.close();
 
-        String[] columnNames = {"Column 1", "Column 2", "Column 3"}; // Replace with your actual column names
-
-
+        List<String> columns = new ArrayList<>(documents.get(0).keySet());
         for (Document document : documents) {
-            Object[] rowData = {
-                    document.get(fromTable),
-            }; // Replace field1, field2, field3 with the actual fields in your documents
 
-            MainFrame.getInstance().getAppCore().getTableModel().addRow(rowData); // treba da se zove setRows i da se sve smesta u te rows, ovo sve se ne desava ovde
+            Row row = new Row();
+            for (String column : columns) {
+                Object value = document.get(column);
+
+                row.addField(column, value);
+            }
+
+            rows.add(row);
         }
 
 
         closeConnection();
+        return rows;
     }
 }

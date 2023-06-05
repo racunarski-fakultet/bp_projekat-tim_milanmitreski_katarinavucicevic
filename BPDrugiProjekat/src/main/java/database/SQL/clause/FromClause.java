@@ -21,6 +21,7 @@ public class FromClause extends SQLClause {
     public void addJoin(JoinCondition joinCondition) {
         if(!hasJoins) {
             joins = new LinkedList<>();
+            hasJoins = true;
         }
         joins.add(joinCondition);
     }
@@ -34,10 +35,26 @@ public class FromClause extends SQLClause {
         String result = "FROM " + table.getTableName();   /// null pointer
         if(hasJoins) {
             for (JoinCondition joinCondition : joins) {
-                result.concat(joinCondition.toString());
+                result = result.concat(joinCondition.toString());
                 //result += joinCondition.toString();
             }
         }
         return result;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public boolean isHasJoins() {
+        return hasJoins;
+    }
+
+    public List<JoinCondition> getJoins() {
+        return joins;
+    }
+
+    public void setHasJoins(boolean hasJoins) {
+        this.hasJoins = hasJoins;
     }
 }

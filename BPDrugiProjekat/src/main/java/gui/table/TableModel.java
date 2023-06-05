@@ -13,14 +13,15 @@ public class TableModel extends DefaultTableModel {
 
     private void updateModel(){
 
-        int columnCount = rows.get(0).getFields().keySet().size();  // koliko kolona imamo
-                                                                    // keyset - nazivi kolona
+        Vector columnVector = new Vector(rows.get(0).getFields().keySet());
+        Vector dataVector = new Vector();
 
-        Vector columnVector = DefaultTableModel.convertToVector(rows.get(0).getFields().keySet().toArray());
-        Vector dataVector = new Vector(columnCount);
-
-        for(int i = 0; i < rows.size(); i++){
-            dataVector.add(DefaultTableModel.convertToVector(rows.get(i).getFields().keySet().toArray()));
+        for (Row row : rows) {
+            Vector rowVector = new Vector();
+            for (Object value : row.getFields().values()) {
+                rowVector.add(value);
+            }
+            dataVector.add(rowVector);
         }
 
         setDataVector(dataVector, columnVector);
