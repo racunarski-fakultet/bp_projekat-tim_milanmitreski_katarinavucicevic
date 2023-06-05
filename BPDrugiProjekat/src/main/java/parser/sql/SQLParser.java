@@ -4,7 +4,6 @@ import database.SQL.*;
 import database.SQL.clause.*;
 import database.SQL.condition.*;
 import gui.MainFrame;
-import observer.IPublisher;
 import observer.ISubscriber;
 import parser.Parser;
 
@@ -71,13 +70,11 @@ public class SQLParser implements Parser {
             String next = listIterator.next();
             next = next.replaceAll(",", "");
             boolean isKeyword = SQLKeyword.checkKeyword(next);
-            if (next.matches("[a-z_]+\\([a-z_]+\\)")) {
+            if (next.matches("[a-z0-9_]+\\([a-z0-9_]+\\)")) {
                 String[] aggregateFunction = next.split("[(,)]");
-                Column c = new Column(aggregateFunction[1], aggregateFunction[0]);
-                selectClause.addColumn(c);
-            } else if (!isKeyword && (next.matches("[a-z_*]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
-                Column c = new Column(next);
-                selectClause.addColumn(c);
+                selectClause.addColumn(new Column(aggregateFunction[1], aggregateFunction[0]));
+            } else if (!isKeyword && (next.matches("[a-z0-9_*]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+"))) {
+                selectClause.addColumn(new Column(next));
                 if(next.equals("*")) {
                     if(!validSelect) {
                         validSelect = true;
@@ -97,7 +94,7 @@ public class SQLParser implements Parser {
         if(!listIterator.hasNext()) error("FROM clause not valid");
         String next = listIterator.next();
         FromClause fromClause = new FromClause(sqlQuery);
-        if (next.matches("[a-z_]+\\.[a-z_]+")) {
+        if (next.matches("[a-z0-9_]+\\.[a-z0-9_]+")) {
             Table table = new Table(next);
             fromClause.setTable(table);
         } else error("FROM not followed by TABLE");
@@ -108,26 +105,24 @@ public class SQLParser implements Parser {
             }
             if(!listIterator.hasNext()) error("FROM clause not valid");
             next = listIterator.next();
-            if (next.matches("[a-z_]+\\.[a-z_]+")) {
+            if (next.matches("[a-z0-9_]+\\.[a-z0-9_]+")) {
                 Table table = new Table(next);
                 if(!listIterator.hasNext()) error("FROM clause not valid");
                 next = listIterator.next();
                 if (next.equals("using")) {
                     if(!listIterator.hasNext()) error("FROM clause not valid");
                     next = listIterator.next();
-                    if (next.matches("\\([a-z_]+\\)") || next.matches("\\([a-z_]+\\.[a-z_]+\\.[a-z_]+\\)")) {
-                        JoinCondition joinCondition = new JoinCondition(table, new Column(next.replaceAll("[()]", "")));
-                        fromClause.addJoin(joinCondition);
+                    if (next.matches("\\([a-z0-9_]+\\)") || next.matches("\\([a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+\\)")) {
+                        fromClause.addJoin(new JoinCondition(table, new Column(next.replaceAll("[()]", ""))));
                     } else error("USING not followed by valid condition");
                 } else if (next.equals("on")) {
                     if(!listIterator.hasNext()) error("FROM clause not valid");
                     next = listIterator.next();
-                    if (next.matches("\\([a-z_]+=[a-z_]+\\)") || next.matches("\\([a-z_]+\\.[a-z_]+\\.[a-z_]+=[a-z_]+\\.[a-z_]+\\.[a-z_]+\\)")) {
-                        String[] columns = next.split("[(=)]");
-                        Column conditionColumn = new Column(columns[0]);
-                        Column conditionColumnOn = new Column(columns[1]);
-                        JoinCondition joinCondition = new JoinCondition(table, conditionColumn, conditionColumnOn);
-                        fromClause.addJoin(joinCondition);
+                    if (next.matches("\\([a-z0-9_]+=[a-z0-9_]+\\)") || next.matches("\\([a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+=[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+\\)")) {
+                        next = next.replaceAll("[()]", "");
+                        String[] columns = next.split("=");
+                        fromClause.addJoin(new JoinCondition(table, new Column(columns[0]), new Column(columns[1])));
+                        System.out.println(fromClause);
                     } else error("ON not followed by valid condition");
                 } else error("JOIN not followed by valid condition (ON/USING)");
             } else error("JOIN not followed by valid TABLE name");
@@ -139,43 +134,19 @@ public class SQLParser implements Parser {
         while(listIterator.hasNext()) {
             String next = listIterator.next();
             boolean isKeyword = SQLKeyword.checkKeyword(next);
-            if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
+            if (!isKeyword && (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+"))) {
                 Column c = new Column(next);
                 if (!listIterator.hasNext()) error("WHERE clause not valid");
                 next = listIterator.next();
-                if (next.equals("between")) {
-                    if (!listIterator.hasNext()) error("WHERE clause not valid");
-                    next = listIterator.next();
-                    Object o1 = new Object();
-                    Object o2 = new Object();
-                    if (next.equals("(select")) {
-                        String ssubQuery = locateSubQuery(listIterator);
-                        o1 = parse(ssubQuery);
-                    } else if (next.matches("[0-9]+")) {
-                        o1 = Integer.valueOf(next);
-                    } else error("BETWEEN doesn't have valid argument");
-                    if (!listIterator.hasNext() || !listIterator.next().equals("and")) error("BETWEEN doesn't contain AND");
-                    if (!listIterator.hasNext()) error("WHERE clause not valid");
-                    next = listIterator.next();
-                    if (next.equals("(select")) {
-                        String ssubQuery = locateSubQuery(listIterator);
-                        o2 = parse(ssubQuery);
-                    } else if (next.matches("[0-9]+")) {
-                        o2 = Integer.valueOf(next);
-                    } else error("BETWEEN doesn't have valid argument");
-                    BetweenCondition betweenCondition = new BetweenCondition(c, o1, o2);
-                    whereClause.addCondition(betweenCondition);
-                } else if (next.equals("like")) {
+                if (next.equals("like")) {
                     if (!listIterator.hasNext()) error("WHERE clause not valid");
                     next = listIterator.next();
                     if (next.equals("(select")) {
                         String ssubQuery = locateSubQuery(listIterator);
                         SQLQuery subQuery = parse(ssubQuery);
-                        LikeCondition likeCondition = new LikeCondition(c, subQuery);
-                        whereClause.addCondition(likeCondition);
+                        whereClause.addCondition(new LikeCondition(c, subQuery));
                     } else if (next.matches("'[^']+'")) {
-                        LikeCondition likeCondition = new LikeCondition(c, next);
-                        whereClause.addCondition(likeCondition);
+                        whereClause.addCondition(new LikeCondition(c, next));
                     } else error("LIKE doesn't have a valid argument");
                 } else if (next.matches("(>)|(<)|(>=)|(<=)|=")) {
                     String operator = next;
@@ -184,11 +155,9 @@ public class SQLParser implements Parser {
                     if (next.equals("(select")) {
                         String ssubQuery = locateSubQuery(listIterator);
                         SQLQuery subQuery = parse(ssubQuery);
-                        RelationCondition relationCondition = new RelationCondition(c, operator, subQuery);
-                        whereClause.addCondition(relationCondition);
+                        whereClause.addCondition(new RelationCondition(c, operator, subQuery));
                     } else if (next.matches("[0-9]+")) {
-                        RelationCondition relationCondition = new RelationCondition(c, operator, Integer.valueOf(next));
-                        whereClause.addCondition(relationCondition);
+                        whereClause.addCondition(new RelationCondition(c, operator, Integer.valueOf(next)));
                     } else error("Relation condition doesn't have a valid argument");
                 } else if (next.equals("in")) {
                     if (!listIterator.hasNext()) error("WHERE clause not valid");
@@ -205,7 +174,7 @@ public class SQLParser implements Parser {
                         for (String value : values)
                             inCondition.addValue(Integer.valueOf(value));
                         whereClause.addCondition(inCondition);
-                    } else if (next.matches("\\([a-z_]+\\.[a-z_]+\\.[a-z_]+\\)")) {
+                    } else if (next.matches("\\([a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+\\)")) {
                         List<String> values = List.of(next.split("[(,)]"));
                         InCondition inCondition = new InCondition(c, true);
                         for (String value : values)
@@ -236,9 +205,8 @@ public class SQLParser implements Parser {
                 String next = listIterator.next();
                 next = next.replaceAll(",", "");
                 boolean isKeyword = SQLKeyword.checkKeyword(next);
-                if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
-                    Column c = new Column(next);
-                    groupClause.addGroupColumn(c);
+                if (!isKeyword && (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+"))) {
+                    groupClause.addGroupColumn(new Column(next));
                 } else {
                     listIterator.previous();
                     break;
@@ -246,114 +214,13 @@ public class SQLParser implements Parser {
                 validGroup = true;
             }
             if(!validGroup) error("GROUP BY clause not valid");
-            /* if(!listIterator.hasNext()) return;
-            String next = listIterator.next();
-            if(next.equals("having")) {
-                boolean validCondition = false;
-                while(listIterator.hasNext()) {
-                    next = listIterator.next();
-                    boolean isKeyword = SQLKeyword.checkKeyword(next);
-                    if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+") || next.matches("[a-z_]+\\([a-z_]+\\)"))) {
-                        Column c;
-                        if(next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))
-                            c = new Column(next);
-                        else {
-                            String[] aggregateFunction = next.split("[(,)]");
-                            c = new Column(aggregateFunction[1], aggregateFunction[0]);
-                        }
-                        if (!listIterator.hasNext()) error();
-                        next = listIterator.next();
-                        if (next.equals("between")) {
-                            if (!listIterator.hasNext()) error();
-                            next = listIterator.next();
-                            Object o1 = new Object();
-                            Object o2 = new Object();
-                            if (next.equals("(select")) {
-                                String ssubQuery = locateSubQuery(listIterator);
-                                o1 = parse(ssubQuery);
-                            } else if (next.matches("[0-9]+")) {
-                                o1 = Integer.valueOf(next);
-                            } else error();
-                            if (!listIterator.hasNext() || !listIterator.next().equals("and")) error();
-                            if (!listIterator.hasNext()) error();
-                            next = listIterator.next();
-                            if (next.equals("(select")) {
-                                String ssubQuery = locateSubQuery(listIterator);
-                                o2 = parse(ssubQuery);
-                            } else if (next.matches("[0-9]+")) {
-                                o2 = Integer.valueOf(next);
-                            } else error();
-                            BetweenCondition betweenCondition = new BetweenCondition(c, o1, o2);
-                            groupClause.addCondition(betweenCondition);
-                        } else if (next.equals("like")) {
-                            if (!listIterator.hasNext()) error();
-                            next = listIterator.next();
-                            if (next.equals("(select")) {
-                                String ssubQuery = locateSubQuery(listIterator);
-                                SQLQuery subQuery = parse(ssubQuery);
-                                LikeCondition likeCondition = new LikeCondition(c, subQuery);
-                                groupClause.addCondition(likeCondition);
-                            } else if (next.matches("'[^']+'")) {
-                                LikeCondition likeCondition = new LikeCondition(c, next);
-                                groupClause.addCondition(likeCondition);
-                            } else error();
-                        } else if (next.matches("(>)|(<)|(>=)|(<=)|=")) {
-                            String operator = next;
-                            if (!listIterator.hasNext()) error();
-                            next = listIterator.next();
-                            if (next.equals("(select")) {
-                                String ssubQuery = locateSubQuery(listIterator);
-                                SQLQuery subQuery = parse(ssubQuery);
-                                RelationCondition relationCondition = new RelationCondition(c, operator, subQuery);
-                                groupClause.addCondition(relationCondition);
-                            } else if (next.matches("[0-9]+")) {
-                                RelationCondition relationCondition = new RelationCondition(c, operator, Integer.valueOf(next));
-                                groupClause.addCondition(relationCondition);
-                            } else error();
-                        } else if (next.equals("in")) {
-                            if (!listIterator.hasNext()) error();
-                            next = listIterator.next();
-                            if (next.equals("(select")) {
-                                String ssubQuery = locateSubQuery(listIterator);
-                                SQLQuery subQuery = parse(ssubQuery);
-                                InCondition inCondition = new InCondition(c, true);
-                                inCondition.addValue(subQuery);
-                                groupClause.addCondition(inCondition);
-                            } else if (next.matches("\\([0-9]+(,[0-9]+)*\\)")) {
-                                List<String> values = List.of(next.split("[(,)]"));
-                                InCondition inCondition = new InCondition(c, true);
-                                for (String value : values)
-                                    inCondition.addValue(Integer.valueOf(value));
-                                groupClause.addCondition(inCondition);
-                            } else if (next.matches("\\([a-z_]+\\.[a-z_]+\\.[a-z_]+\\)")) {
-                                List<String> values = List.of(next.split("[(,)]"));
-                                InCondition inCondition = new InCondition(c, true);
-                                for (String value : values)
-                                    inCondition.addValue(value);
-                                groupClause.addCondition(inCondition);
-                            } else error();
-                        } else error();
-                        validCondition = true;
-                        if (!listIterator.hasNext()) break;
-                        next = listIterator.next();
-                        if (next.equals("and") || next.equals("or")) {
-                            groupClause.addLogicalOperator(next);
-                            validCondition = false;
-                        } else {
-                            listIterator.previous();
-                            break;
-                        }
-                    } else error();
-                }
-                if(!validCondition) error();
-            } else error(); */
         } else error("GROUP not followed by BY");
     }
     private void generateOrderClause(ListIterator<String> listIterator, SQLQuery sqlQuery) {
         if (listIterator.hasNext() && listIterator.next().equals("by")) {
             if(!listIterator.hasNext()) error("ORDER BY clause not valid");
             String next = listIterator.next();
-            if (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+")) {
+            if (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+")) {
                 Column column = new Column(next);
                 if(!listIterator.hasNext()) error("ORDER BY clause not valid");
                 next = listIterator.next();

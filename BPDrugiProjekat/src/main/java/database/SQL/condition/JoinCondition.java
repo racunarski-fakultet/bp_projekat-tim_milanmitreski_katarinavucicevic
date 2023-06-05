@@ -17,7 +17,7 @@ public class JoinCondition {
     }
 
     public JoinCondition(Table joinTable, Column conditionColumn, Column conditionColumnOn) {
-        this.joinConditionType = JoinConditionType.USING;
+        this.joinConditionType = JoinConditionType.ON;
         this.joinTable = joinTable;
         this.conditionColumn = conditionColumn;
         this.conditionColumnOn = conditionColumnOn;
@@ -26,9 +26,26 @@ public class JoinCondition {
     @Override
     public String toString() {
         if(joinConditionType == JoinConditionType.ON) {
-            return " JOIN " + joinTable.getTableName() + " ON (" + conditionColumn.getColumnName() + "=" + conditionColumnOn + ")";
+            return " JOIN " + joinTable.getTableName() + " ON (" + conditionColumn.getColumnName() + "=" + conditionColumnOn.getColumnName() + ")";
         } else {
             return " JOIN " + joinTable.getTableName() + " USING (" + conditionColumn.getColumnName() + ")";
         }
     }
+
+    public Column getConditionColumn() {
+        return conditionColumn;
+    }
+
+    public Column getConditionColumnOn() {
+        return conditionColumnOn;
+    }
+
+    public JoinConditionType getJoinConditionType() {
+        return joinConditionType;
+    }
+
+    public Table getJoinTable() {
+        return joinTable;
+    }
+
 }
