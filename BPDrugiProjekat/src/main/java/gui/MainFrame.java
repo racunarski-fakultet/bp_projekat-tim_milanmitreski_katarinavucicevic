@@ -56,7 +56,7 @@ public class MainFrame extends JFrame implements ISubscriber {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                appCore.getParser().parse(textArea.getText());
+                appCore.getParser().parse(textArea.getText(), false);
                 /// INSTANCA VALIDATORA!!!!!!
                 new FilterTablePanel();
             }

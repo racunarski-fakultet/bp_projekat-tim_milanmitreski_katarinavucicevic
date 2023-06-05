@@ -1,14 +1,11 @@
 package adapter;
 
 import database.SQL.Column;
+import database.SQL.LogicalOperator;
 import database.SQL.OrderType;
 import database.SQL.SQLQuery;
-import database.SQL.clause.FromClause;
-import database.SQL.clause.OrderClause;
-import database.SQL.clause.SQLClause;
-import database.SQL.clause.SelectClause;
-import database.SQL.condition.JoinCondition;
-import database.SQL.condition.JoinConditionType;
+import database.SQL.clause.*;
+import database.SQL.condition.*;
 import database.mongo.MongoQuery;
 import observer.ISubscriber;
 import org.bson.Document;
@@ -48,76 +45,165 @@ public class QueryAdapterImplementation implements QueryAdapter {
 
     public void convertParameters() {
         convertSelect();
-        System.out.println(selectConverted.toJson());
         convertFrom();
-        System.out.println(fromConverted.toJson());
         convertWhere();
         convertGroup();
         convertOrder();
-        System.out.println(orderConverted.toJson());
     }
 
     private void convertWhere() {
+        for(SQLClause clause : query.getClauses()) {
+            if(clause instanceof WhereClause) {
+                WhereClause whereClause = (WhereClause) clause;
+                StringBuilder match = new StringBuilder("{$match:");
+                ListIterator<LogicalOperator> listIterator = whereClause.getLogicalOperators().listIterator();
+                for (WGCondition condition : whereClause.getConditionList()) {
+                    match.append("{");
+                    if(listIterator.hasNext()) {
+                        match.append("$").append(listIterator.next().name().toLowerCase()).append(":[{");
+                    }
+
+                    if(condition instanceof InCondition) {
+                        InCondition inCondition = (InCondition) condition;
+                        if(inCondition.isSubQuery()) {
+
+                        } else {
+                            match.append("$in:[");
+                            for(Object value : inCondition.getValues()) {
+                                match.append(value.toString()).append(",");
+                            }
+                            match.deleteCharAt(match.lastIndexOf(","));
+                            match.append("]");
+                        }
+                    } else if(condition instanceof RelationCondition) {
+                        RelationCondition relationCondition = (RelationCondition) condition;
+                        if(relationCondition.getReferenceValue() instanceof SQLQuery) {
+
+                        } else {
+                            if(condition.getConditionColumn().getColumnName().contains(".")) {
+                                match.append("\"").append("$").append(condition.getConditionColumn().getColumnName().split("\\.")[1]);
+                                match.append(".").append(condition.getConditionColumn().getColumnName().split("\\.")[2]);
+                            } else match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":{$");
+                            match.append(relationCondition.getRelationConditionType().name().toLowerCase()).append(":");
+                            match.append(relationCondition.getReferenceValue().toString()).append("}");
+                        }
+                    } else {
+                        if(condition.getConditionColumn().getColumnName().contains(".")) {
+                            match.append("\"").append("$").append(condition.getConditionColumn().getColumnName().split("\\.")[1]);
+                            match.append(".").append(condition.getConditionColumn().getColumnName().split("\\.")[2]);
+                        } else match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":/^");
+                        match.append(((LikeCondition)condition).getReferenceValue().replace("%",".*").replace("_",".").replace("'",""));
+                        match.append("$/");
+                    }
+                    match.append("},");
+                }
+                match.deleteCharAt(match.lastIndexOf(","));
+                for(int i = 0; i < whereClause.getLogicalOperators().size(); i++) {
+                    match.append("]}");
+                }
+                match.append("}");
+                System.out.println(match);
+                whereConverted = Document.parse(match.toString());
+                System.out.println(whereConverted.toJson());
+            }
+        }
+        whereConverted = null;
     }
 
     private void convertGroup() {
-
+        for(SQLClause clause : query.getClauses()) {
+            if(clause instanceof GroupClause) {
+                GroupClause groupClause = (GroupClause) clause;
+                StringBuilder group = new StringBuilder("{ $group: { _id: {");
+                for(Column c : groupClause.getGroupColumns()) {
+                    if(c.getColumnName().contains(".")) {
+                        group.append(c.getColumnName().replace(".", "_")).append(":\"");
+                        group.append("$").append(c.getColumnName().split("\\.")[1]).append(".").append(c.getColumnName().split("\\.")[2]).append("\",");
+                    } else {
+                        group.append(c.getColumnName()).append(":\"");
+                        group.append("$").append(c.getColumnName()).append("\",");
+                    }
+                }
+                group.deleteCharAt(group.lastIndexOf(",")).append("},");
+                for(Column c : ((SelectClause) query.getClauses().get(0)).getColumns()) {
+                    if(c.isAggregate()) {
+                        if(c.getColumnName().contains(".")) {
+                            group.append("\"").append(c.getAggregateFunction().name().toLowerCase());
+                            group.append("_").append(c.getColumnName().replace(".","_")).append("\":");
+                            group.append("{ $").append(c.getAggregateFunction().name().toLowerCase()).append(":\"");
+                            group.append("$").append(c.getColumnName().split("\\.")[1]).append(".").append(c.getColumnName().split("\\.")[2]).append("\"},");
+                        } else {
+                            group.append("\"").append(c.getAggregateFunction().name().toLowerCase());
+                            group.append("_").append(c.getColumnName()).append("\":");
+                            group.append("{ $").append(c.getAggregateFunction().name().toLowerCase()).append(":\"");
+                            group.append("$").append(c.getColumnName()).append("\"},");
+                        }
+                    } else {
+                        if(c.getColumnName().contains(".")) {
+                            group.append("\"").append(c.getColumnName().replace(".","_")).append("\":");
+                            group.append("{ $first").append(":\"");
+                            group.append("$").append(c.getColumnName().split("\\.")[1]).append(".").append(c.getColumnName().split("\\.")[2]).append("\"},");
+                        } else {
+                            group.append("\"").append(c.getColumnName()).append("\":");
+                            group.append("{ $first").append(":\"");
+                            group.append("$").append(c.getColumnName()).append("\"},");
+                        }
+                    }
+                }
+                group.deleteCharAt(group.lastIndexOf(",")).append("}}");
+                System.out.println(group);
+                groupConverted = Document.parse(group.toString());
+            }
+        }
+        groupConverted = null;
     }
 
     private void convertFrom() {
-        for(SQLClause clause : query.getClauses()) {
-            if(clause instanceof FromClause) {
-                FromClause fromClause = (FromClause) clause;
-                table = fromClause.getTable().getTableName().split("\\.")[1];
-                if(fromClause.isHasJoins()) {
-                    StringBuilder joins = new StringBuilder();
-                    for (JoinCondition joinCondition : fromClause.getJoins()) {
-                        joins.append("{ $lookup :{");
-                        joins.append("from:\"").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"");
-                        String conditionColumn = (joinCondition.getConditionColumn().getColumnName().contains(".")) ? joinCondition.getConditionColumn().getColumnName().split("\\.")[0] : joinCondition.getConditionColumn().getColumnName();
-                        joins.append(",localField:").append("\"").append(conditionColumn).append("\"");
-                        if(joinCondition.getJoinConditionType() == JoinConditionType.ON) {
-                            String conditionColumnOn = (joinCondition.getConditionColumnOn().getColumnName().contains(".")) ? joinCondition.getConditionColumnOn().getColumnName().split("\\.")[0] : joinCondition.getConditionColumnOn().getColumnName() ;
-                            joins.append(",foreignField:").append("\"").append(conditionColumnOn).append("\"");
-                        } else {
-                            joins.append(",foreignField:").append("\"").append(conditionColumn).append("\"");;
-                        }
-                        joins.append("as: \"").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"");
-                        joins.append("}},{ $unwind:\"$").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"},");
-                    }
-                    joins.deleteCharAt(joins.lastIndexOf(","));
-                    joins.append("}");
-                    fromConverted = Document.parse(joins.toString());
+        FromClause fromClause = (FromClause) query.getClauses().get(1);
+        table = fromClause.getTable().getTableName().split("\\.")[1];
+        if(fromClause.isHasJoins()) {
+            StringBuilder joins = new StringBuilder();
+            for (JoinCondition joinCondition : fromClause.getJoins()) {
+                joins.append("{ $lookup :{");
+                joins.append("from:\"").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"");
+                String conditionColumn = (joinCondition.getConditionColumn().getColumnName().contains(".")) ? joinCondition.getConditionColumn().getColumnName().split("\\.")[0] : joinCondition.getConditionColumn().getColumnName();
+                joins.append(",localField:").append("\"").append(conditionColumn).append("\"");
+                if(joinCondition.getJoinConditionType() == JoinConditionType.ON) {
+                    String conditionColumnOn = (joinCondition.getConditionColumnOn().getColumnName().contains(".")) ? joinCondition.getConditionColumnOn().getColumnName().split("\\.")[0] : joinCondition.getConditionColumnOn().getColumnName() ;
+                    joins.append(",foreignField:").append("\"").append(conditionColumnOn).append("\"");
+                } else {
+                    joins.append(",foreignField:").append("\"").append(conditionColumn).append("\"");;
                 }
+                joins.append("as: \"").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"");
+                joins.append("}},{ $unwind:\"$").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"},");
             }
+            joins.deleteCharAt(joins.lastIndexOf(","));
+            joins.append("}");
+            fromConverted = Document.parse(joins.toString());
         }
     }
 
     private void convertSelect() {
-        for(SQLClause clause : query.getClauses()) {
-            if(clause instanceof SelectClause) {
-                SelectClause selectClause = (SelectClause) clause;
-                StringBuilder json = new StringBuilder("{ $project : {");
-                for(Column c : selectClause.getColumns()) {
-                    if(!c.getColumnName().contains(".")) {
-                        if (c.isAggregate()) {
-                            json.append("\"").append(c.getAggregateFunction().name().toLowerCase()).append("_").append(c.getColumnName()).append("\": 1,");
-                        } else {
-                            json.append("\"").append(c.getColumnName()).append("\": 1,");
-                        }
-                    } else {
-                        json.append("\"$").append(c.getColumnName().split("\\.")[1]).append(".");
-                        if (c.isAggregate()) {
-                            json.append(c.getAggregateFunction().name().toLowerCase()).append("_").append(c.getColumnName().split("\\.")[2]).append("\": 1,");
-                        } else {
-                            json.append(c.getColumnName().split("\\.")[2]).append("\": 1,");
-                        }
-                    }
+        SelectClause selectClause = (SelectClause) query.getClauses().get(0);
+        StringBuilder json = new StringBuilder("{ $project : {");
+        for(Column c : selectClause.getColumns()) {
+            if(!c.getColumnName().contains(".")) {
+                if (c.isAggregate()) {
+                    json.append("\"").append(c.getAggregateFunction().name().toLowerCase()).append("_").append(c.getColumnName()).append("\": 1,");
+                } else {
+                    json.append("\"").append(c.getColumnName()).append("\": 1,");
                 }
-                json.append("_id:0}}");
-                selectConverted = Document.parse(json.toString());
+            } else {
+                json.append("\"$").append(c.getColumnName().split("\\.")[1]).append(".");
+                if (c.isAggregate()) {
+                    json.append(c.getAggregateFunction().name().toLowerCase()).append("_").append(c.getColumnName().split("\\.")[2]).append("\": 1,");
+                } else {
+                    json.append(c.getColumnName().split("\\.")[2]).append("\": 1,");
+                }
             }
         }
+        json.append("_id:0}}");
+        selectConverted = Document.parse(json.toString());
     }
 
     public void convertOrder() {

@@ -1,23 +1,23 @@
 package database.SQL.condition;
 
 public enum RelationConditionType {
-    G,
-    GE,
-    L,
-    LE,
-    E;
+    GT,
+    GTE,
+    LT,
+    LTE,
+    EQ;
 
     public static RelationConditionType getRelationConditionType(String relationConditionType) {
         if(relationConditionType.equalsIgnoreCase(">"))
-            return G;
+            return GT;
         else if(relationConditionType.equalsIgnoreCase(">="))
-            return GE;
+            return GTE;
         else if(relationConditionType.equalsIgnoreCase("<"))
-            return L;
+            return LT;
         else if(relationConditionType.equalsIgnoreCase("<="))
-            return LE;
+            return LTE;
         else if(relationConditionType.equalsIgnoreCase("="))
-            return E;
+            return EQ;
         else
             return null;
     }
@@ -25,15 +25,15 @@ public enum RelationConditionType {
     @Override
     public String toString() {
         switch (this) {
-            case E:
+            case EQ:
                 return "=";
-            case G:
+            case GT:
                 return ">";
-            case GE:
+            case GTE:
                 return ">=";
-            case LE:
+            case LTE:
                 return "<=";
-            case L:
+            case LT:
                 return "<";
             default:
                 return null;

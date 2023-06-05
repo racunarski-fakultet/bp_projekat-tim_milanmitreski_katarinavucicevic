@@ -22,8 +22,8 @@ public class SQLParser implements Parser {
     /** parser je implementiran pre smanjenja funkcionalnosti
      ** parser uspesno parsira i podupite koji nisu u WHERE itd.
      **/
-
-    public SQLQuery parse(String sQuery) {
+    @Override
+    public SQLQuery parse(String sQuery, boolean isSubQuery) {
         String sQueryLowerCase = sQuery.toLowerCase();
         List<String> tokens = List.of(sQueryLowerCase.split(" +"));
         ListIterator<String> listIterator = tokens.listIterator();
@@ -59,7 +59,9 @@ public class SQLParser implements Parser {
                     break;
             }
         }
-        notify(sqlQuery);
+        if(!isSubQuery) {
+            notify(sqlQuery);
+        }
         return sqlQuery;
     }
 
@@ -141,11 +143,7 @@ public class SQLParser implements Parser {
                 if (next.equals("like")) {
                     if (!listIterator.hasNext()) error("WHERE clause not valid");
                     next = listIterator.next();
-                    if (next.equals("(select")) {
-                        String ssubQuery = locateSubQuery(listIterator);
-                        SQLQuery subQuery = parse(ssubQuery);
-                        whereClause.addCondition(new LikeCondition(c, subQuery));
-                    } else if (next.matches("'[^']+'")) {
+                    if (next.matches("'[^']+'")) {
                         whereClause.addCondition(new LikeCondition(c, next));
                     } else error("LIKE doesn't have a valid argument");
                 } else if (next.matches("(>)|(<)|(>=)|(<=)|=")) {
@@ -154,7 +152,7 @@ public class SQLParser implements Parser {
                     next = listIterator.next();
                     if (next.equals("(select")) {
                         String ssubQuery = locateSubQuery(listIterator);
-                        SQLQuery subQuery = parse(ssubQuery);
+                        SQLQuery subQuery = parse(ssubQuery, true);
                         whereClause.addCondition(new RelationCondition(c, operator, subQuery));
                     } else if (next.matches("[0-9]+")) {
                         whereClause.addCondition(new RelationCondition(c, operator, Integer.valueOf(next)));
@@ -164,19 +162,21 @@ public class SQLParser implements Parser {
                     next = listIterator.next();
                     if (next.equals("(select")) {
                         String ssubQuery = locateSubQuery(listIterator);
-                        SQLQuery subQuery = parse(ssubQuery);
+                        SQLQuery subQuery = parse(ssubQuery, true);
                         InCondition inCondition = new InCondition(c, true);
                         inCondition.addValue(subQuery);
                         whereClause.addCondition(inCondition);
                     } else if (next.matches("\\([0-9]+(,[0-9]+)*\\)")) {
-                        List<String> values = List.of(next.split("[(,)]"));
-                        InCondition inCondition = new InCondition(c, true);
+                        next = next.replaceAll("[()]", "");
+                        List<String> values = List.of(next.split(","));
+                        InCondition inCondition = new InCondition(c, false);
                         for (String value : values)
                             inCondition.addValue(Integer.valueOf(value));
                         whereClause.addCondition(inCondition);
-                    } else if (next.matches("\\([a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+\\)")) {
-                        List<String> values = List.of(next.split("[(,)]"));
-                        InCondition inCondition = new InCondition(c, true);
+                    } else if (next.matches("\\('[a-z0-9_]+'\\)")) {
+                        next = next.replaceAll("[()]", "");
+                        List<String> values = List.of(next.split(","));
+                        InCondition inCondition = new InCondition(c, false);
                         for (String value : values)
                             inCondition.addValue(value);
                         whereClause.addCondition(inCondition);

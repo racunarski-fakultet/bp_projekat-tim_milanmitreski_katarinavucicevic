@@ -4,14 +4,14 @@ import database.SQL.Column;
 
 public class LikeCondition extends WGCondition{
 
-    private Object referenceValue;
+    private String referenceValue;
 
-    public LikeCondition(Column conditionColumn, Object referenceValue) {
+    public LikeCondition(Column conditionColumn, String referenceValue) {
         super(conditionColumn);
         this.referenceValue = referenceValue;
     }
 
-    public Object getReferenceValue() {
+    public String getReferenceValue() {
         return referenceValue;
     }
 }
