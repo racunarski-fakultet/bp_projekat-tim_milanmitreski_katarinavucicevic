@@ -6,7 +6,7 @@ import database.SQL.clause.SQLClause;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SQLQuery{
+public class SQLQuery implements Query{
 
     private List<SQLClause> clauses;
 
@@ -29,5 +29,15 @@ public class SQLQuery{
             result.append(clause.toString()).append(" ");
         }
         return result.toString().trim();
+    }
+
+    @Override
+    public Object runQuery() {
+        return null;
+    }
+
+    @Override
+    public void update(Object notification) {
+
     }
 }

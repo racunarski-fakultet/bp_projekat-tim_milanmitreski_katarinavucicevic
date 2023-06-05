@@ -6,5 +6,5 @@ import org.bson.Document;
 
 public interface Query extends ISubscriber {
 
-    MongoCursor<Document> runQuery();
+    Object runQuery();
 }

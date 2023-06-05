@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import database.Query;
 import org.bson.Document;
+import utils.Constants;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,10 +25,10 @@ public class MongoQuery implements Query{   /// executor
     @Override
     public MongoCursor<Document> runQuery(){
         MongoClient connection = MongoConnection.getConnection();
-        MongoDatabase database = connection.getDatabase(table);
-        MongoCursor<Document> cursor = database.aggregate(jsonQuery).iterator();
+        MongoDatabase database = connection.getDatabase(Constants.DATABASE);
+        MongoCursor<Document> cursor = database.getCollection(table).aggregate(jsonQuery).iterator();
         MongoConnection.closeConnection();
-
+        System.out.println(cursor.next().toJson());
 
         return cursor;
     }
@@ -39,5 +40,14 @@ public class MongoQuery implements Query{   /// executor
     @Override
     public void update(Object notification) {
 
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        for (Document doc : jsonQuery) {
+            result.append(doc.toJson()).append(",");
+        }
+        return result.toString();
     }
 }

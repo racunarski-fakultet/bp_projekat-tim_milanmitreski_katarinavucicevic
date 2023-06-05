@@ -7,8 +7,10 @@ import database.SQL.SQLQuery;
 import database.SQL.clause.*;
 import database.SQL.condition.*;
 import database.mongo.MongoQuery;
+import gui.MainFrame;
 import observer.ISubscriber;
 import org.bson.Document;
+import start.Main;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,8 +22,8 @@ public class QueryAdapterImplementation implements QueryAdapter {
     private List<ISubscriber> subs;
     private String table;
     private Document selectConverted;
-    private Document fromConverted;
-    private Document whereConverted;
+    private List<Document> fromConverted;
+    private List<Document> whereConverted;
     private Document groupConverted;
     private Document orderConverted;
 
@@ -34,11 +36,14 @@ public class QueryAdapterImplementation implements QueryAdapter {
         convertParameters();
         MongoQuery mongoQuery = new MongoQuery(table);
         map(mongoQuery);
+        mongoQuery.runQuery();
         notify(mongoQuery);
     }
 
     @Override
     public void update(Object notification) {
+        this.fromConverted = new LinkedList<>();
+        this.whereConverted = new LinkedList<>();
         query = (SQLQuery) notification;
         queryConverter();
     }
@@ -46,16 +51,17 @@ public class QueryAdapterImplementation implements QueryAdapter {
     public void convertParameters() {
         convertSelect();
         convertFrom();
-        convertWhere();
+        convertWhere(query,false);
         convertGroup();
         convertOrder();
     }
 
-    private void convertWhere() {
-        for(SQLClause clause : query.getClauses()) {
+    private String convertWhere(SQLQuery sqlQuery, boolean isSubQuery) {
+        for(SQLClause clause : sqlQuery.getClauses()) {
             if(clause instanceof WhereClause) {
                 WhereClause whereClause = (WhereClause) clause;
                 StringBuilder match = new StringBuilder("{$match:");
+                StringBuilder sub = new StringBuilder();
                 ListIterator<LogicalOperator> listIterator = whereClause.getLogicalOperators().listIterator();
                 for (WGCondition condition : whereClause.getConditionList()) {
                     match.append("{");
@@ -66,7 +72,23 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     if(condition instanceof InCondition) {
                         InCondition inCondition = (InCondition) condition;
                         if(inCondition.isSubQuery()) {
-
+                            SQLQuery subQuery = (SQLQuery) inCondition.getValues().get(0);
+                            SelectClause subSelectClause = (SelectClause) subQuery.getClauses().get(0);
+                            FromClause subFromClause = (FromClause) subQuery.getClauses().get(1);
+                            sub.append("{$lookup:{");
+                            sub.append("from:\"").append(subFromClause.getTable().getTableName().split("\\.")[1]).append("\"");
+                            String localColumn = (inCondition.getConditionColumn().getColumnName().contains(".")) ? inCondition.getConditionColumn().getColumnName().split("\\.")[0] : inCondition.getConditionColumn().getColumnName();
+                            String foreignColumn = (subSelectClause.getColumns().get(0).getColumnName().contains(".")) ? subSelectClause.getColumns().get(0).getColumnName().split("\\.")[0] : subSelectClause.getColumns().get(0).getColumnName();
+                            sub.append(",localField:").append("\"").append(localColumn).append("\"");
+                            sub.append(",foreignField:").append("\"").append(foreignColumn).append("\"");;
+                            sub.append("as: \"subquery\"");
+                            sub.append("}}");
+                            whereConverted.add(Document.parse(sub.toString()));
+                            sub = new StringBuilder("{ $unwind:\"$subquery\"}");
+                            whereConverted.add(Document.parse(sub.toString()));
+                            String result = convertWhere(subQuery,true);
+                            result = result.replace("{$match:{","").replaceAll("}}$","");
+                            match.append(result);
                         } else {
                             match.append("$in:[");
                             for(Object value : inCondition.getValues()) {
@@ -78,7 +100,17 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     } else if(condition instanceof RelationCondition) {
                         RelationCondition relationCondition = (RelationCondition) condition;
                         if(relationCondition.getReferenceValue() instanceof SQLQuery) {
-
+                            SQLQuery subQuery = (SQLQuery) relationCondition.getReferenceValue();
+                            SelectClause subSelectClause = (SelectClause) subQuery.getClauses().get(0);
+                            FromClause subFromClause = (FromClause) subQuery.getClauses().get(1);
+                            sub.append("{ $lookup: {");
+                            sub.append("from:\"").append(subFromClause.getTable().getTableName().split("\\.")[1]).append("\"");
+                            String localColumn = (relationCondition.getConditionColumn().getColumnName().contains(".")) ? relationCondition.getConditionColumn().getColumnName().split("\\.")[0] : relationCondition.getConditionColumn().getColumnName();
+                            String foreignColumn = (subSelectClause.getColumns().get(0).getColumnName().contains(".")) ? subSelectClause.getColumns().get(0).getColumnName().split("\\.")[0] : subSelectClause.getColumns().get(0).getColumnName();
+                            sub.append(",localField:").append("\"").append(localColumn).append("\"");
+                            sub.append(",foreignField:").append("\"").append(foreignColumn).append("\"");;
+                            sub.append("as: \"subquery\"");
+                            sub.append("}},{ $unwind:\"$subquery\"},");
                         } else {
                             if(condition.getConditionColumn().getColumnName().contains(".")) {
                                 match.append("\"").append("$").append(condition.getConditionColumn().getColumnName().split("\\.")[1]);
@@ -102,12 +134,16 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     match.append("]}");
                 }
                 match.append("}");
-                System.out.println(match);
-                whereConverted = Document.parse(match.toString());
-                System.out.println(whereConverted.toJson());
+                if(!isSubQuery) {
+                    whereConverted.add(Document.parse(match.toString()));
+                    return null;
+                } else {
+                    return match.toString();
+                }
             }
         }
-        whereConverted = null;
+        if(!isSubQuery) whereConverted = null;
+        return null;
     }
 
     private void convertGroup() {
@@ -151,7 +187,6 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     }
                 }
                 group.deleteCharAt(group.lastIndexOf(",")).append("}}");
-                System.out.println(group);
                 groupConverted = Document.parse(group.toString());
             }
         }
@@ -175,11 +210,12 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     joins.append(",foreignField:").append("\"").append(conditionColumn).append("\"");;
                 }
                 joins.append("as: \"").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"");
-                joins.append("}},{ $unwind:\"$").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"},");
+                joins.append("}}");
+                fromConverted.add(Document.parse(joins.toString()));
+                joins = new StringBuilder();
+                joins.append("{ $unwind:\"$").append(joinCondition.getJoinTable().getTableName().split("\\.")[1]).append("\"}");
+                fromConverted.add(Document.parse(joins.toString()));
             }
-            joins.deleteCharAt(joins.lastIndexOf(","));
-            joins.append("}");
-            fromConverted = Document.parse(joins.toString());
         }
     }
 
@@ -223,11 +259,19 @@ public class QueryAdapterImplementation implements QueryAdapter {
     }
 
     public void map(MongoQuery mongoQuery) {
-        mongoQuery.addJsonQuery(whereConverted);
-        mongoQuery.addJsonQuery(fromConverted);
-        mongoQuery.addJsonQuery(groupConverted);
+        if(!whereConverted.isEmpty()) {
+            for (Document doc : whereConverted) {
+                mongoQuery.addJsonQuery(doc);
+            }
+        }
+        if(!fromConverted.isEmpty()) {
+            for (Document doc : fromConverted) {
+                mongoQuery.addJsonQuery(doc);
+            }
+        }
+        if(groupConverted != null) mongoQuery.addJsonQuery(groupConverted);
         mongoQuery.addJsonQuery(selectConverted);
-        mongoQuery.addJsonQuery(orderConverted);
+        if(orderConverted != null) mongoQuery.addJsonQuery(orderConverted);
     }
 
     @Override
