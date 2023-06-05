@@ -34,10 +34,8 @@ public class MongoConnection {
         String password = (String) settings.getParameter(Constants.PASSWORD);
         String database = (String) settings.getParameter(Constants.DATABASE);
 
-
         MongoCredential credential = MongoCredential.createCredential(userName, database, password.toCharArray());
         mongoClient = new MongoClient(new ServerAddress(ip, 27017), Arrays.asList(credential));
-
         System.out.println("MongoDB connection established");
 
         return mongoClient;

@@ -1,5 +1,7 @@
 package start;
 
+import adapter.QueryAdapter;
+import adapter.QueryAdapterImplementation;
 import database.mongo.MongoConnection;
 import database.settings.Settings;
 import database.settings.SettingsImplementation;
@@ -18,6 +20,7 @@ public class AppCore {
     private Settings settings;
     private Parser parser;
     private Validator validator;
+    private QueryAdapter queryAdapter;
     private MessageGenerator messageGenerator;
 
     public AppCore() {
@@ -27,7 +30,9 @@ public class AppCore {
         this.parser = new SQLParser();
         this.messageGenerator = new MessageGeneratorImplementation();
         this.validator = new Validator();
+        this.queryAdapter = new QueryAdapterImplementation();
         parser.addSub(validator);
+        validator.addSub(queryAdapter);
     }
 
     private Settings initSettings(){

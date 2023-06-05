@@ -19,7 +19,8 @@ public class SQLQuery implements Query {
         this.clauses = new LinkedList<>();
     }
 
-    public void runQuery(String from){
+    /** Sta ce nam ovo? Mi nikad necemo pokretati SQL Query zar ne? **/
+    /* public void runQuery(String from){
                                                                               // objasnjenje za ovu i metodu ispod
         String query = "SELECT * FROM" + from;                                // query se pise isto (from ce biti departments u njenom primeru)
         try {                                                                 // resultset zivi samo dok je otvorena konekcija,
@@ -58,7 +59,7 @@ public class SQLQuery implements Query {
 
         return rows;
 
-    }
+    } */
 
 
     public void addClause(SQLClause clause) {

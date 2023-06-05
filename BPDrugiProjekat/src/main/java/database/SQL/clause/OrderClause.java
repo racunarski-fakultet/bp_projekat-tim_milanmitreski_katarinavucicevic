@@ -18,4 +18,12 @@ public class OrderClause extends SQLClause {
     public String toString() {
         return "ORDER BY " + orderColumn.getColumnName() + " " + orderType.name();
     }
+
+    public Column getOrderColumn() {
+        return orderColumn;
+    }
+
+    public OrderType getOrderType() {
+        return orderType;
+    }
 }

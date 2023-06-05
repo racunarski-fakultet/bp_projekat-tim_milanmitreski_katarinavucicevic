@@ -20,6 +20,9 @@ public class SQLParser implements Parser {
         this.subs = new LinkedList<>();
     }
 
+    /** parser je implementiran pre smanjenja funkcionalnosti
+     ** parser uspesno parsira i podupite koji nisu u WHERE itd.
+     **/
     @Override
     public SQLQuery parse(String sQuery) {
         String sQueryLowerCase = sQuery.toLowerCase();
@@ -72,9 +75,15 @@ public class SQLParser implements Parser {
                 String[] aggregateFunction = next.split("[(,)]");
                 Column c = new Column(aggregateFunction[1], aggregateFunction[0]);
                 selectClause.addColumn(c);
-            } else if (!isKeyword && (next.matches("[a-z_]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
+            } else if (!isKeyword && (next.matches("[a-z_*]+") || next.matches("[a-z_]+\\.[a-z_]+\\.[a-z_]+"))) {
                 Column c = new Column(next);
                 selectClause.addColumn(c);
+                if(next.equals("*")) {
+                    if(!validSelect) {
+                        validSelect = true;
+                        break;
+                    } else error("SELECT contains something besides *");
+                }
             } else {
                 listIterator.previous();
                 break;

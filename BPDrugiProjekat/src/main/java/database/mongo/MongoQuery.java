@@ -1,26 +1,25 @@
 package database.mongo;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import database.Query;
+import observer.IPublisher;
+import observer.ISubscriber;
 import org.bson.Document;
 
-public class MongoQuery implements Query {   ///executor
+import java.util.Arrays;
 
-    private static MongoClient connection;
-    //private MongoConnection mongoConnection;
+public class MongoQuery implements Query{   /// executor
 
-    public MongoQuery(MongoClient connection) {
-        MongoQuery.connection = connection;
-    }
+    private String table;
+    private Document jsonQuery;
 
-    @Override
-    public void runQuery(String from){
-
-        MongoConnection.getConnection();
-
-        //MongoDatabase database = connection.getDatabase();
-
+    /** Ovako mi je mnogo logicnije **/
+    public void runQuery(){
+        MongoClient connection = MongoConnection.getConnection();
+        MongoDatabase database = connection.getDatabase(table);
+        MongoCursor<Document> cursor = database.aggregate(Arrays.asList(jsonQuery)).iterator();
         MongoConnection.closeConnection();
     }
 }
