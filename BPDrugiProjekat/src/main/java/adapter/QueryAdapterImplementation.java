@@ -8,10 +8,8 @@ import database.SQL.SQLQuery;
 import database.SQL.clause.*;
 import database.SQL.condition.*;
 import database.mongo.MongoQuery;
-import gui.MainFrame;
 import observer.ISubscriber;
 import org.bson.Document;
-import start.Main;
 
 import java.util.LinkedList;
 import java.util.List;

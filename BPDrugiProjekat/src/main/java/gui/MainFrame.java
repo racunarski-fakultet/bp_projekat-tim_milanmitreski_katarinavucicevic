@@ -1,7 +1,6 @@
 package gui;
 
 import gui.queryPanel.FilterTablePanel;
-import gui.queryPanel.Packager;
 import message.Message;
 import observer.ISubscriber;
 import start.AppCore;
@@ -54,12 +53,9 @@ public class MainFrame extends JFrame implements ISubscriber {
 
         add(scrollPane, BorderLayout.SOUTH);
 
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                appCore.getParser().parse(textArea.getText(), false);
-                new FilterTablePanel();
-            }
+        button.addActionListener(e -> {
+            appCore.getParser().parse(textArea.getText(), false);
+            new FilterTablePanel();
         });
 
         this.pack();
@@ -72,10 +68,6 @@ public class MainFrame extends JFrame implements ISubscriber {
         this.appCore = appCore;
         this.table.setModel(appCore.getTableModel());
         appCore.getMessageGenerator().addSub(this);
-    }
-
-    public JTable getTable() {
-        return table;
     }
 
     public AppCore getAppCore() {

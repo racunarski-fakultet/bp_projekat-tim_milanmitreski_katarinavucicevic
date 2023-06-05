@@ -3,7 +3,6 @@ package validator;
 import database.SQL.Column;
 import database.SQL.SQLQuery;
 import database.SQL.clause.*;
-import database.SQL.condition.WGCondition;
 import gui.MainFrame;
 import observer.IPublisher;
 import observer.ISubscriber;

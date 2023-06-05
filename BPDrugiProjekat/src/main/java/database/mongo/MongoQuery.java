@@ -15,8 +15,6 @@ public class MongoQuery implements Query{   /// executor
     private String table;
     private List<Document> jsonQuery;
 
-    /** Ovako mi je mnogo logicnije **/
-
     public MongoQuery(String table) {
         this.jsonQuery = new LinkedList<>();
         this.table = table;

@@ -1,12 +1,10 @@
 package gui.queryPanel;
 
-import data.Row;
 import database.mongo.MongoConnection;
 import gui.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class FilterTablePanel extends JFrame{
 
@@ -32,9 +30,5 @@ public class FilterTablePanel extends JFrame{
         this.setVisible(true);
 
         MongoConnection.closeConnection();
-    }
-
-    public Packager getPackager() {
-        return packager;
     }
 }

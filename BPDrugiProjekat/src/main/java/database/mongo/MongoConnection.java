@@ -42,9 +42,9 @@ public class MongoConnection {
     public static void closeConnection(){
         System.out.println("connection succcesfully closed");
         mongoClient.close();
-    }  // svaki put kad pokrenem query
+    }
 
-    public List<Row> readData(String fromTable){   /// List<Row> povratni tip
+    public List<Row> readData(String fromTable){
 
         List<Row> rows = new ArrayList<>();
 
