@@ -6,10 +6,8 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import data.Row;
 import database.settings.Settings;
 import gui.MainFrame;
-import gui.table.TableModel;
 import org.bson.Document;
 import utils.Constants;
 
@@ -49,7 +47,6 @@ public class MongoConnection {
 
         getConnection();
         MongoDatabase database = mongoClient.getDatabase("bp_tim68");
-
 
         MongoCollection<Document> collection = database.getCollection("departments");
 

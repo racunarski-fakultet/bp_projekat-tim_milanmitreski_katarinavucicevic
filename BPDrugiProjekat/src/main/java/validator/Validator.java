@@ -11,27 +11,38 @@ import observer.ISubscriber;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Validator implements ISubscriber, IPublisher {
+public class Validator implements ISubscriber, IPublisher, IValidator {
 
     private SQLQuery query;
     List<ISubscriber> subs = new ArrayList<>();
 
     @Override
-    public void update(Object notification) {
-        query = (SQLQuery) notification;
+    public boolean validate(){
         if(!containsSelect()){
             error("SELECT clause missing");
-            return;
+            return false;
         }
         if(!containsFrom()){
             error("FROM clause missing");
-            return;
+            return false;
         }
         if(!aggAndGroup()) {
             error("There are columns which are neither aggregated nor grouped");
-            return;
+            return false;
         }
-        notify(query);
+        return true;
+    }
+
+    @Override
+    public void update(Object notification) {
+        query = (SQLQuery) notification;
+
+        if(validate()){
+            notify(query);
+        } else {
+            error("invalid");
+        }
+
     }
 
     public boolean containsSelect(){

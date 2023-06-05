@@ -16,10 +16,19 @@ public class MongoQuery implements Query{   /// executor
     private Document jsonQuery;
 
     /** Ovako mi je mnogo logicnije **/
-    public void runQuery(){
+    @Override
+    public MongoCursor<Document> runQuery(){
         MongoClient connection = MongoConnection.getConnection();
-        MongoDatabase database = connection.getDatabase(table);
+        MongoDatabase database = connection.getDatabase(table); // bptim68
         MongoCursor<Document> cursor = database.aggregate(Arrays.asList(jsonQuery)).iterator();
         MongoConnection.closeConnection();
+
+
+        return cursor;
+    }
+
+    @Override
+    public void update(Object notification) {
+
     }
 }

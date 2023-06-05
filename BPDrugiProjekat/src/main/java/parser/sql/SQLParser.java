@@ -23,7 +23,7 @@ public class SQLParser implements Parser {
     /** parser je implementiran pre smanjenja funkcionalnosti
      ** parser uspesno parsira i podupite koji nisu u WHERE itd.
      **/
-    @Override
+
     public SQLQuery parse(String sQuery) {
         String sQueryLowerCase = sQuery.toLowerCase();
         List<String> tokens = List.of(sQueryLowerCase.split(" +"));
