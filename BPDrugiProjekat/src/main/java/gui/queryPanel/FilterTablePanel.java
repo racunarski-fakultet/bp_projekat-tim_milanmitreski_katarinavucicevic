@@ -1,26 +1,28 @@
 package gui.queryPanel;
 
 import data.Row;
-import database.SQL.SQLQuery;
+import database.mongo.MongoConnection;
+import gui.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class FilterTablePanel extends JFrame {
+public class FilterTablePanel extends JFrame{
 
-    private SQLQuery query;
-    private List<Row> resultSet;
+    private Packager packager;
 
     public FilterTablePanel() {
 
-        //String fromTable = "";   /// these model things, are not going to be here, in view
-        //resultSet = query.saveResultSet(fromTable);   /// this is just a representatation of an idea
+        MongoConnection.getConnection();
+
+        packager = MainFrame.getInstance().getAppCore().getPackager();
+
+        JTable newTable = new JTable(packager.getFilteredModel());
+        JScrollPane newScrollPane = new JScrollPane(newTable);
+        packager.setFilteredData();
 
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        JTable newTable = new JTable();
-        JScrollPane newScrollPane = new JScrollPane(newTable);
 
         JPanel newPanel = new JPanel(new BorderLayout());
         newPanel.add(newScrollPane, BorderLayout.CENTER);
@@ -28,5 +30,11 @@ public class FilterTablePanel extends JFrame {
         this.setContentPane(newPanel);
         this.setSize(400, 300);
         this.setVisible(true);
+
+        MongoConnection.closeConnection();
+    }
+
+    public Packager getPackager() {
+        return packager;
     }
 }

@@ -5,6 +5,7 @@ import adapter.QueryAdapterImplementation;
 import database.mongo.MongoConnection;
 import database.settings.Settings;
 import database.settings.SettingsImplementation;
+import gui.queryPanel.Packager;
 import gui.table.TableModel;
 import message.MessageGenerator;
 import message.MessageGeneratorImplementation;
@@ -22,6 +23,7 @@ public class AppCore {
     private Validator validator;
     private QueryAdapter queryAdapter;
     private MessageGenerator messageGenerator;
+    private Packager packager;
 
     public AppCore() {
         this.tableModel = new TableModel();
@@ -31,8 +33,10 @@ public class AppCore {
         this.messageGenerator = new MessageGeneratorImplementation();
         this.validator = new Validator();
         this.queryAdapter = new QueryAdapterImplementation();
+        this.packager = new Packager();
         parser.addSub(validator);
         validator.addSub(queryAdapter);
+        queryAdapter.addSub(packager);
     }
 
     private Settings initSettings(){
@@ -44,10 +48,8 @@ public class AppCore {
         return settingsImpl;
     }
 
-    public void initialiseData(String fromTable){   // poziva se u mainu; to ce biti inicijalno ucitavanje podataka iz tabele
-        tableModel.setRows(mongoConnection.readData(fromTable));   /// ne moram da inicijalizujem podatka
-        //mongoConnection.readData(fromTable);
-        // vraca rows (setrows pretvara u vektor)
+    public void initialiseData(String fromTable){   //inicijalno ucitavanje podataka iz tabele
+        tableModel.setRows(mongoConnection.readData(fromTable));
     }
 
     public TableModel getTableModel() {
@@ -60,5 +62,13 @@ public class AppCore {
 
     public MessageGenerator getMessageGenerator() {
         return messageGenerator;
+    }
+
+    public QueryAdapter getQueryAdapter() {
+        return queryAdapter;
+    }
+
+    public Packager getPackager() {
+        return packager;
     }
 }

@@ -8,8 +8,6 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import data.Row;
 import database.settings.Settings;
-import gui.MainFrame;
-import gui.table.TableModel;
 import org.bson.Document;
 import utils.Constants;
 
@@ -42,8 +40,9 @@ public class MongoConnection {
     }
 
     public static void closeConnection(){
+        System.out.println("connection succcesfully closed");
         mongoClient.close();
-    }  // svaki piut kad pokrenem query
+    }  // svaki put kad pokrenem query
 
     public List<Row> readData(String fromTable){   /// List<Row> povratni tip
 

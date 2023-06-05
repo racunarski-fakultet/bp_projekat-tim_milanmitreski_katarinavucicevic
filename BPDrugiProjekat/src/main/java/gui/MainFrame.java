@@ -1,6 +1,7 @@
 package gui;
 
 import gui.queryPanel.FilterTablePanel;
+import gui.queryPanel.Packager;
 import message.Message;
 import observer.ISubscriber;
 import start.AppCore;
@@ -14,7 +15,7 @@ public class MainFrame extends JFrame implements ISubscriber {
 
     private static MainFrame instance = null;
     private AppCore appCore;
-    private JTable table;  //njegov model je TableModel, koji se definise preko vektora
+    private JTable table;
 
     private MainFrame(){
 
@@ -57,7 +58,6 @@ public class MainFrame extends JFrame implements ISubscriber {
             @Override
             public void actionPerformed(ActionEvent e) {
                 appCore.getParser().parse(textArea.getText(), false);
-                /// INSTANCA VALIDATORA!!!!!!
                 new FilterTablePanel();
             }
         });
@@ -65,7 +65,6 @@ public class MainFrame extends JFrame implements ISubscriber {
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
-
 
     }
 

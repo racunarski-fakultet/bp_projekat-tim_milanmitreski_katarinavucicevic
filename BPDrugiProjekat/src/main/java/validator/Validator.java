@@ -14,7 +14,7 @@ import java.util.List;
 public class Validator implements ISubscriber, IPublisher, IValidator {
 
     private SQLQuery query;
-    List<ISubscriber> subs = new ArrayList<>();
+    private List<ISubscriber> subs = new ArrayList<>();
 
     @Override
     public boolean validate(){

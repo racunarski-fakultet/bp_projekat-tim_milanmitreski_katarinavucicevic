@@ -24,11 +24,11 @@ public class MongoQuery implements Query{   /// executor
 
     @Override
     public MongoCursor<Document> runQuery(){
+
         MongoClient connection = MongoConnection.getConnection();
         MongoDatabase database = connection.getDatabase(Constants.DATABASE);
         MongoCursor<Document> cursor = database.getCollection(table).aggregate(jsonQuery).iterator();
         MongoConnection.closeConnection();
-        System.out.println(cursor.next().toJson());
 
         return cursor;
     }

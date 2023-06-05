@@ -1,5 +1,6 @@
 package adapter;
 
+import com.mongodb.client.MongoCursor;
 import database.SQL.Column;
 import database.SQL.LogicalOperator;
 import database.SQL.OrderType;
@@ -36,8 +37,8 @@ public class QueryAdapterImplementation implements QueryAdapter {
         convertParameters();
         MongoQuery mongoQuery = new MongoQuery(table);
         map(mongoQuery);
-        mongoQuery.runQuery();
-        notify(mongoQuery);
+        MongoCursor<Document> cursor = mongoQuery.runQuery();  /// ovo je logicno, a ne mongoQuery.runQuery pa notify(query)
+        notify(cursor);
     }
 
     @Override
@@ -259,9 +260,11 @@ public class QueryAdapterImplementation implements QueryAdapter {
     }
 
     public void map(MongoQuery mongoQuery) {
-        if(!whereConverted.isEmpty()) {
-            for (Document doc : whereConverted) {
-                mongoQuery.addJsonQuery(doc);
+        if(whereConverted != null) {
+            if (!whereConverted.isEmpty()) {
+                for (Document doc : whereConverted) {
+                    mongoQuery.addJsonQuery(doc);
+                }
             }
         }
         if(!fromConverted.isEmpty()) {
