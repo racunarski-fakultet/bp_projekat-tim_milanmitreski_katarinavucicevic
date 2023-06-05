@@ -21,4 +21,8 @@ public class InCondition extends WGCondition {
     public void addValue(Object value) {
         this.values.add(value);
     }
+
+    public List<Object> getValues() {
+        return values;
+    }
 }

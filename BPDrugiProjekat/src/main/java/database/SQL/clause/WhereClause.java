@@ -38,4 +38,8 @@ public class WhereClause extends SQLClause {
     public List<WGCondition> getConditionList() {
         return conditionList;
     }
+
+    public List<LogicalOperator> getLogicalOperators() {
+        return logicalOperators;
+    }
 }

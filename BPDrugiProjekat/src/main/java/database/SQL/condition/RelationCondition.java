@@ -16,4 +16,12 @@ public class RelationCondition extends WGCondition{
     public String toString() {
         return getConditionColumn().getColumnName() + " " + relationConditionType.toString() + " " + referenceValue.toString();
     }
+
+    public RelationConditionType getRelationConditionType() {
+        return relationConditionType;
+    }
+
+    public Object getReferenceValue() {
+        return referenceValue;
+    }
 }
