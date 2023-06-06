@@ -1,5 +1,6 @@
 package gui;
 
+import gui.error.ErrorDialog;
 import gui.queryPanel.FilterTablePanel;
 import message.Message;
 import observer.ISubscriber;
@@ -78,7 +79,9 @@ public class MainFrame extends JFrame implements ISubscriber {
     public void update(Object notification) {
         if(notification instanceof Message) {
             Message message = (Message) notification;
-            System.out.println(message);
+            ErrorDialog errorDialog = new ErrorDialog(this, message);
+            errorDialog.setVisible(true);
+            //System.out.println(message);
         }
     }
 }

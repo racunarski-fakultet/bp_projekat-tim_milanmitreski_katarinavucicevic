@@ -4,6 +4,7 @@ import database.SQL.*;
 import database.SQL.clause.*;
 import database.SQL.condition.*;
 import gui.MainFrame;
+import gui.error.ErrorDialog;
 import observer.ISubscriber;
 import parser.Parser;
 
@@ -81,7 +82,10 @@ public class SQLParser implements Parser {
                     if(!validSelect) {
                         validSelect = true;
                         break;
-                    } else error("SELECT contains something besides *");
+                    } else {
+                        error("SELECT contains something besides *");
+                        return;
+                    }
                 }
             } else {
                 listIterator.previous();
@@ -89,7 +93,10 @@ public class SQLParser implements Parser {
             }
             validSelect = true;
         }
-        if(!validSelect) error("SELECT clause not valid");
+        if(!validSelect) {
+            error("SELECT clause not valid");
+            return;
+        }
     }
 
     private void generateFromClause(ListIterator<String> listIterator, SQLQuery sqlQuery) {
@@ -138,17 +145,29 @@ public class SQLParser implements Parser {
             boolean isKeyword = SQLKeyword.checkKeyword(next);
             if (!isKeyword && (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+"))) {
                 Column c = new Column(next);
-                if (!listIterator.hasNext()) error("WHERE clause not valid");
+                if (!listIterator.hasNext()) {
+                    error("WHERE clause not valid");
+                    return;
+                }
                 next = listIterator.next();
                 if (next.equals("like")) {
-                    if (!listIterator.hasNext()) error("WHERE clause not valid");
+                    if (!listIterator.hasNext()) {
+                        error("WHERE clause not valid");
+                        return;
+                    }
                     next = listIterator.next();
                     if (next.matches("'[^']+'")) {
                         whereClause.addCondition(new LikeCondition(c, next));
-                    } else error("LIKE doesn't have a valid argument");
+                    } else {
+                        error("LIKE doesn't have a valid argument");
+                        return;
+                    }
                 } else if (next.matches("(>)|(<)|(>=)|(<=)|=")) {
                     String operator = next;
-                    if (!listIterator.hasNext()) error("WHERE clause not valid");
+                    if (!listIterator.hasNext()) {
+                        error("WHERE clause not valid");
+                        return;
+                    }
                     next = listIterator.next();
                     if (next.equals("(select")) {
                         String ssubQuery = locateSubQuery(listIterator);
@@ -156,9 +175,15 @@ public class SQLParser implements Parser {
                         whereClause.addCondition(new RelationCondition(c, operator, subQuery));
                     } else if (next.matches("[0-9]+")) {
                         whereClause.addCondition(new RelationCondition(c, operator, Integer.valueOf(next)));
-                    } else error("Relation condition doesn't have a valid argument");
+                    } else {
+                        error("Relation condition doesn't have a valid argument");
+                        return;
+                    }
                 } else if (next.equals("in")) {
-                    if (!listIterator.hasNext()) error("WHERE clause not valid");
+                    if (!listIterator.hasNext()) {
+                        error("WHERE clause not valid");
+                        return;
+                    }
                     next = listIterator.next();
                     if (next.equals("(select")) {
                         String ssubQuery = locateSubQuery(listIterator);
@@ -180,8 +205,14 @@ public class SQLParser implements Parser {
                         for (String value : values)
                             inCondition.addValue(value);
                         whereClause.addCondition(inCondition);
-                    } else error("IN doesn't have a valid argument");
-                } else error("WHERE isn't followed by valid condition");
+                    } else {
+                        error("IN doesn't have a valid argument");
+                        return;
+                    }
+                } else {
+                    error("WHERE isn't followed by valid condition");
+                    return;
+                }
                 validCondition = true;
                 if (!listIterator.hasNext()) break;
                 next = listIterator.next();
@@ -192,9 +223,15 @@ public class SQLParser implements Parser {
                     listIterator.previous();
                     break;
                 }
-            } else error("WHERE condition doesn't contain a valid column");
+            } else {
+                error("WHERE condition doesn't contain a valid column");
+                return;
+            }
         }
-        if(!validCondition) error("WHERE clause not valid");
+        if(!validCondition) {
+            error("WHERE clause not valid");
+            return;
+        }
     }
 
     private void generateGroupClause(ListIterator<String> listIterator, SQLQuery sqlQuery) {
@@ -218,17 +255,32 @@ public class SQLParser implements Parser {
     }
     private void generateOrderClause(ListIterator<String> listIterator, SQLQuery sqlQuery) {
         if (listIterator.hasNext() && listIterator.next().equals("by")) {
-            if(!listIterator.hasNext()) error("ORDER BY clause not valid");
+            if(!listIterator.hasNext()) {
+                error("ORDER BY clause not valid");
+                return;
+            }
             String next = listIterator.next();
             if (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+")) {
                 Column column = new Column(next);
-                if(!listIterator.hasNext()) error("ORDER BY clause not valid");
+                if(!listIterator.hasNext()) {
+                    error("ORDER BY clause not valid");
+                    return;
+                }
                 next = listIterator.next();
                 if (next.equals("asc") || next.equals("desc")) {
                     new OrderClause(sqlQuery, column, next);
-                } else error("ORDER BY doesn't have a valid order type");
-            } else error("ORDER BY doesn't have a valid column to sort by");
-        } else error("ORDER not followed by BY");
+                } else {
+                    error("ORDER BY doesn't have a valid order type");
+                    return;
+                }
+            } else {
+                error("ORDER BY doesn't have a valid column to sort by");
+                return;
+            }
+        } else {
+            error("ORDER not followed by BY");
+            return;
+        }
     }
 
     private String locateSubQuery(ListIterator<String> listIterator) {
