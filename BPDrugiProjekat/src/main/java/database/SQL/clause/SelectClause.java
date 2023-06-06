@@ -8,10 +8,12 @@ import java.util.List;
 
 public class SelectClause extends SQLClause {
     private List<Column> columns;
+    private boolean isStar;
 
     public SelectClause(SQLQuery query) {
         super(query);
         this.columns = new LinkedList<>();
+        this.isStar = false;
     }
 
     public void addColumn(Column column) {
@@ -31,5 +33,13 @@ public class SelectClause extends SQLClause {
         result = result.trim();
         result = result.replaceAll(",$", "");
         return result;
+    }
+
+    public boolean isStar() {
+        return isStar;
+    }
+
+    public void setStar(boolean star) {
+        isStar = star;
     }
 }

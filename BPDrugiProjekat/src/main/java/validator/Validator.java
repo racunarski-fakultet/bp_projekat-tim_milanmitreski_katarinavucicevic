@@ -35,13 +35,9 @@ public class Validator implements ISubscriber, IPublisher, IValidator {
     @Override
     public void update(Object notification) {
         query = (SQLQuery) notification;
-
         if(validate()){
             notify(query);
-        } else {
-            error("invalid");
         }
-
     }
 
     public boolean containsSelect(){

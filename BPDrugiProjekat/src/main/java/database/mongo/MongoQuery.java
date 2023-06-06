@@ -25,7 +25,12 @@ public class MongoQuery implements Query{   /// executor
 
         MongoClient connection = MongoConnection.getConnection();
         MongoDatabase database = connection.getDatabase(Constants.DATABASE);
-        MongoCursor<Document> cursor = database.getCollection(table).aggregate(jsonQuery).iterator();
+        MongoCursor<Document> cursor;
+        if(!jsonQuery.isEmpty()) {
+            cursor = database.getCollection(table).aggregate(jsonQuery).iterator();
+        } else {
+            cursor = database.getCollection(table).find(Document.parse("{}")).projection(Document.parse("{}")).iterator();
+        }
         MongoConnection.closeConnection();
 
         return cursor;

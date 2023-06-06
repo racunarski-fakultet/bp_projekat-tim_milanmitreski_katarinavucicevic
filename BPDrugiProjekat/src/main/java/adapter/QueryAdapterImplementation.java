@@ -35,6 +35,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
         convertParameters();
         MongoQuery mongoQuery = new MongoQuery(table);
         map(mongoQuery);
+        System.out.println(mongoQuery);
         MongoCursor<Document> cursor = mongoQuery.runQuery();  /// ovo je logicno, a ne mongoQuery.runQuery pa notify(query)
         notify(cursor);
     }
@@ -67,7 +68,6 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     if(listIterator.hasNext()) {
                         match.append("$").append(listIterator.next().name().toLowerCase()).append(":[{");
                     }
-
                     if(condition instanceof InCondition) {
                         InCondition inCondition = (InCondition) condition;
                         if(inCondition.isSubQuery()) {
@@ -89,17 +89,26 @@ public class QueryAdapterImplementation implements QueryAdapter {
                             result = result.replace("{$match:{","").replaceAll("}}$","");
                             match.append(result);
                         } else {
-                            match.append("$in:[");
+                            if(condition.getConditionColumn().getColumnName().contains(".")) {
+                                match.append("\"").append("$").append(condition.getConditionColumn().getColumnName().split("\\.")[1]);
+                                match.append(".").append(condition.getConditionColumn().getColumnName().split("\\.")[2]);
+                            } else if(isSubQuery) {
+                                match.append("\"").append("subquery.").append(condition.getConditionColumn().getColumnName()).append("\":{$");
+                            } else {
+                                match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":{$");
+                            }
+                            match.append("in:[");
                             for(Object value : inCondition.getValues()) {
                                 match.append(value.toString()).append(",");
                             }
                             match.deleteCharAt(match.lastIndexOf(","));
                             match.append("]");
+                            match.append("},");
                         }
                     } else if(condition instanceof RelationCondition) {
                         RelationCondition relationCondition = (RelationCondition) condition;
                         if(relationCondition.getReferenceValue() instanceof SQLQuery) {
-                            SQLQuery subQuery = (SQLQuery) relationCondition.getReferenceValue();
+                            /* SQLQuery subQuery = (SQLQuery) relationCondition.getReferenceValue();
                             SelectClause subSelectClause = (SelectClause) subQuery.getClauses().get(0);
                             FromClause subFromClause = (FromClause) subQuery.getClauses().get(1);
                             sub.append("{ $lookup: {");
@@ -109,12 +118,16 @@ public class QueryAdapterImplementation implements QueryAdapter {
                             sub.append(",localField:").append("\"").append(localColumn).append("\"");
                             sub.append(",foreignField:").append("\"").append(foreignColumn).append("\"");;
                             sub.append("as: \"subquery\"");
-                            sub.append("}},{ $unwind:\"$subquery\"},");
+                            sub.append("}},{ $unwind:\"$subquery\"},"); */
                         } else {
                             if(condition.getConditionColumn().getColumnName().contains(".")) {
                                 match.append("\"").append("$").append(condition.getConditionColumn().getColumnName().split("\\.")[1]);
                                 match.append(".").append(condition.getConditionColumn().getColumnName().split("\\.")[2]);
-                            } else match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":{$");
+                            } else if(isSubQuery) {
+                                match.append("\"").append("subquery.").append(condition.getConditionColumn().getColumnName()).append("\":{$");
+                            } else {
+                                match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":{$");
+                            }
                             match.append(relationCondition.getRelationConditionType().name().toLowerCase()).append(":");
                             match.append(relationCondition.getReferenceValue().toString()).append("}");
                         }
@@ -122,9 +135,13 @@ public class QueryAdapterImplementation implements QueryAdapter {
                         if(condition.getConditionColumn().getColumnName().contains(".")) {
                             match.append("\"").append("$").append(condition.getConditionColumn().getColumnName().split("\\.")[1]);
                             match.append(".").append(condition.getConditionColumn().getColumnName().split("\\.")[2]);
-                        } else match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":/^");
+                        } else if(isSubQuery) {
+                            match.append("\"").append("subquery.").append(condition.getConditionColumn().getColumnName()).append("\":/^");
+                        } else {
+                            match.append("\"").append(condition.getConditionColumn().getColumnName()).append("\":/^");
+                        }
                         match.append(((LikeCondition)condition).getReferenceValue().replace("%",".*").replace("_",".").replace("'",""));
-                        match.append("$/");
+                        match.append("$/i");
                     }
                     match.append("},");
                 }
@@ -133,6 +150,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     match.append("]}");
                 }
                 match.append("}");
+                System.out.println(match);
                 if(!isSubQuery) {
                     whereConverted.add(Document.parse(match.toString()));
                     return null;
@@ -187,6 +205,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
                 }
                 group.deleteCharAt(group.lastIndexOf(",")).append("}}");
                 groupConverted = Document.parse(group.toString());
+                return;
             }
         }
         groupConverted = null;
@@ -220,6 +239,10 @@ public class QueryAdapterImplementation implements QueryAdapter {
 
     private void convertSelect() {
         SelectClause selectClause = (SelectClause) query.getClauses().get(0);
+        if(selectClause.isStar()) {
+            selectConverted = null;
+            return;
+        }
         StringBuilder json = new StringBuilder("{ $project : {");
         for(Column c : selectClause.getColumns()) {
             if(!c.getColumnName().contains(".")) {
@@ -271,7 +294,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
             }
         }
         if(groupConverted != null) mongoQuery.addJsonQuery(groupConverted);
-        mongoQuery.addJsonQuery(selectConverted);
+        if(selectConverted != null) mongoQuery.addJsonQuery(selectConverted);
         if(orderConverted != null) mongoQuery.addJsonQuery(orderConverted);
     }
 
