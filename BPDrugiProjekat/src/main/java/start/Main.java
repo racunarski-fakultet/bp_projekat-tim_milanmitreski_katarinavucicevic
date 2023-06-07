@@ -8,6 +8,7 @@ public class Main {
         AppCore appCore = new AppCore();
         MainFrame mainFrame = MainFrame.getInstance();
         mainFrame.setAppCore(appCore);
-        appCore.initialiseData("departments");
+        appCore.initialiseData("employees");
+        //appCore.initialiseData("departments");
     }
 }

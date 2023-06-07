@@ -16,10 +16,19 @@ public class Packager implements ISubscriber {
     private TableModel filteredModel;
     private List<Row> rows;
     private  boolean errorFlag = false;
+    private List<String> tables;
 
     public Packager() {
         this.filteredModel = new TableModel();
         rows = new ArrayList<>();
+        tables = new ArrayList<>();
+        tables.add("countries");
+        tables.add("departments");
+        tables.add("employees");
+        tables.add("job_history");
+        tables.add("jobs");
+        tables.add("locations");
+        tables.add("regions");
     }
 
     public void setFilteredData(){
@@ -51,14 +60,28 @@ public class Packager implements ISubscriber {
         MongoConnection.closeConnection();
 
         if(!documents.isEmpty()) {
-            List<String> columns = new ArrayList<>(documents.get(0).keySet());
-
+            List<String> columns = new ArrayList<>();
+            // documents.get(0).keySet()
+            for(String string : documents.get(0).keySet()) {
+                if(tables.contains(string)) {
+                    Document doc = (Document) documents.get(0).get(string);
+                    for(String cols : doc.keySet()) {
+                        columns.add(string + "." + cols);
+                    }
+                } else {
+                    columns.add(string);
+                }
+            }
             for (Document document : documents) {
-
                 Row row = new Row();
                 for (String column : columns) {
-                    Object value = document.get(column);
-
+                    Object value;
+                    if(column.contains(".")){
+                        String[] col = column.split("\\.");
+                        value = ((Document) document.get(col[0])).get(col[1]);
+                    } else {
+                        value = document.get(column);
+                    }
                     row.addField(column, value);
                 }
 
