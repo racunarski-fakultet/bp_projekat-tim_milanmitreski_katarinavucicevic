@@ -29,6 +29,7 @@ public class Packager implements ISubscriber {
         tables.add("jobs");
         tables.add("locations");
         tables.add("regions");
+        tables.add("substring");
     }
 
     public void setFilteredData(){
