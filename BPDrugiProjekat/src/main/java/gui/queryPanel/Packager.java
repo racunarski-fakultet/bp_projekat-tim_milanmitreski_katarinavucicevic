@@ -2,6 +2,7 @@ package gui.queryPanel;
 
 import com.mongodb.client.MongoCursor;
 import data.Row;
+import database.mongo.MongoConnection;
 import gui.table.TableModel;
 import observer.ISubscriber;
 import org.bson.Document;
@@ -44,6 +45,7 @@ public class Packager implements ISubscriber {
         }
 
         cursor.close();
+        MongoConnection.closeConnection();
 
         List<String> columns = new ArrayList<>(documents.get(0).keySet());
         for (Document document : documents) {

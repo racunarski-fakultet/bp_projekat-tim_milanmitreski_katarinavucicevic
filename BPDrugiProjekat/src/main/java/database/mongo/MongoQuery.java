@@ -26,7 +26,7 @@ public class MongoQuery implements Query{   /// executor
         MongoClient connection = MongoConnection.getConnection();
         MongoDatabase database = connection.getDatabase(Constants.DATABASE);
         MongoCursor<Document> cursor = database.getCollection(table).aggregate(jsonQuery).iterator();
-        MongoConnection.closeConnection();
+        //MongoConnection.closeConnection();
 
         return cursor;
     }
