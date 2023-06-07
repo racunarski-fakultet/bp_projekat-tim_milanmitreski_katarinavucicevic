@@ -4,26 +4,22 @@ import database.SQL.Column;
 import database.SQL.OrderType;
 import database.SQL.SQLQuery;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class OrderClause extends SQLClause {
 
-    private Column orderColumn;
-    private OrderType orderType;
-    public OrderClause(SQLQuery query, Column orderColumn, String orderType) {
+    private Map<Column,OrderType> orderColumns;
+    public OrderClause(SQLQuery query) {
         super(query);
-        this.orderColumn = orderColumn;
-        this.orderType = OrderType.getOrderType(orderType);
+        this.orderColumns = new HashMap<>();
     }
 
-    @Override
-    public String toString() {
-        return "ORDER BY " + orderColumn.getColumnName() + " " + orderType.name();
+    public void addOrder(Column column, String orderType) {
+        orderColumns.put(column, OrderType.getOrderType(orderType));
     }
 
-    public Column getOrderColumn() {
-        return orderColumn;
-    }
-
-    public OrderType getOrderType() {
-        return orderType;
+    public Map<Column, OrderType> getOrderColumns() {
+        return orderColumns;
     }
 }
