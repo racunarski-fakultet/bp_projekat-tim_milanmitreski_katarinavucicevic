@@ -11,9 +11,7 @@ import database.mongo.MongoQuery;
 import observer.ISubscriber;
 import org.bson.Document;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class QueryAdapterImplementation implements QueryAdapter {
 
@@ -252,7 +250,7 @@ public class QueryAdapterImplementation implements QueryAdapter {
                     json.append("\"").append(c.getColumnName()).append("\": 1,");
                 }
             } else {
-                json.append("\"$").append(c.getColumnName().split("\\.")[1]).append(".");
+                json.append("\"").append(c.getColumnName().split("\\.")[1]).append(".");
                 if (c.isAggregate()) {
                     json.append(c.getAggregateFunction().name().toLowerCase()).append("_").append(c.getColumnName().split("\\.")[2]).append("\": 1,");
                 } else {
@@ -267,14 +265,20 @@ public class QueryAdapterImplementation implements QueryAdapter {
     public void convertOrder() {
         for(SQLClause clause : query.getClauses()) {
             if(clause instanceof OrderClause) {
+                StringBuilder order = new StringBuilder("{ $sort:{");
                 OrderClause orderClause = (OrderClause) clause;
-                if(orderClause.getOrderType() == OrderType.ASC) {
-                    orderConverted = Document.parse("{ $sort : {\"" + orderClause.getOrderColumn().getColumnName() + "\": 1}}");
-                    return;
-                } else {
-                    orderConverted = Document.parse("{ $sort : {\"" + orderClause.getOrderColumn().getColumnName() + "\": -1}}");
-                    return;
+                for(Map.Entry<Column, OrderType> key : orderClause.getOrderColumns().entrySet()) {
+                    if(key.getValue() == OrderType.ASC) {
+                        order.append("\"" + key.getKey().getColumnName() + "\": 1,");
+                    } else {
+                        order.append("\"" + key.getKey().getColumnName() + "\": -1,");
+                    }
                 }
+                order.deleteCharAt(order.lastIndexOf(","));
+                order.append("}}");
+                System.out.println(order);
+                orderConverted = Document.parse(order.toString());
+                return;
             }
         }
         orderConverted = null;

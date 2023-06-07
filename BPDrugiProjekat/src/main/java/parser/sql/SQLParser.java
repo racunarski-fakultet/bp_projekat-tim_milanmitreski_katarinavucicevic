@@ -270,33 +270,33 @@ public class SQLParser implements Parser {
         } else error("GROUP not followed by BY");
     }
     private void generateOrderClause(ListIterator<String> listIterator, SQLQuery sqlQuery) {
+        boolean validOrder = false;
         if (listIterator.hasNext() && listIterator.next().equals("by")) {
-            if(!listIterator.hasNext()) {
-                error("ORDER BY clause not valid");
-                return;
-            }
-            String next = listIterator.next();
-            if (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+")) {
-                Column column = new Column(next);
-                if(!listIterator.hasNext()) {
-                    error("ORDER BY clause not valid");
-                    return;
-                }
-                next = listIterator.next();
-                if (next.equals("asc") || next.equals("desc")) {
-                    new OrderClause(sqlQuery, column, next);
+            OrderClause orderClause = new OrderClause(sqlQuery);
+            while(listIterator.hasNext()) {
+                validOrder = false;
+                String next = listIterator.next();
+                if (next.matches("[a-z0-9_]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+")) {
+                    Column column = new Column(next);
+                    if(!listIterator.hasNext()) {
+                        error("ORDER BY clause not valid");
+                        return;
+                    }
+                    next = listIterator.next().replaceAll(",", "");
+                    if (next.equals("asc") || next.equals("desc")) {
+                        orderClause.addOrder(column, next);
+                    } else {
+                        error("ORDER BY doesn't have a valid order type");
+                        return;
+                    }
                 } else {
-                    error("ORDER BY doesn't have a valid order type");
+                    error("ORDER BY doesn't have a valid column to sort by");
                     return;
                 }
-            } else {
-                error("ORDER BY doesn't have a valid column to sort by");
-                return;
+                validOrder = true;
             }
-        } else {
-            error("ORDER not followed by BY");
-            return;
-        }
+        } else error("ORDER not followed by BY");
+        if(!validOrder) error("ORDER not valid");
     }
 
     private String locateSubQuery(ListIterator<String> listIterator) {
