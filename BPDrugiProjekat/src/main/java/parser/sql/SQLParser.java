@@ -15,7 +15,7 @@ import java.util.ListIterator;
 public class SQLParser implements Parser {
 
     private List<ISubscriber> subs;
-
+    private boolean foundError;
     public SQLParser() {
         this.subs = new LinkedList<>();
     }
@@ -25,6 +25,7 @@ public class SQLParser implements Parser {
      **/
     @Override
     public SQLQuery parse(String sQuery, boolean isSubQuery) {
+        foundError = false;
         String sQueryLowerCase = sQuery.toLowerCase();
         List<String> tokens = List.of(sQueryLowerCase.split(" +"));
         ListIterator<String> listIterator = tokens.listIterator();
@@ -36,24 +37,37 @@ public class SQLParser implements Parser {
             switch (token) {
                 case "select":
                     generateSelectClause(listIterator, sqlQuery);
+                    if(foundError) return null;
                     hasSelect = true;
                     break;
                 case "from":
-                    if (!hasSelect) error("SELECT clause not found");
+                    if (!hasSelect) {
+                        error("SELECT clause not found");
+                    }
                     generateFromClause(listIterator, sqlQuery);
+                    if(foundError) return null;
                     hasFrom = true;
                     break;
                 case "where":
-                    if (!hasFrom) error("FROM clause not found");
+                    if (!hasFrom) {
+                        error("FROM clause not found");
+                    }
                     generateWhereClause(listIterator, sqlQuery);
+                    if(foundError) return null;
                     break;
                 case "group":
-                    if (!hasFrom) error("FROM clause not found");
+                    if (!hasFrom) {
+                        error("FROM clause not found");
+                    }
                     generateGroupClause(listIterator, sqlQuery);
+                    if(foundError) return null;
                     break;
                 case "order":
-                    if (!hasFrom) error("FROM clause not found");
+                    if (!hasFrom) {
+                        error("FROM clause not found");
+                    }
                     generateOrderClause(listIterator, sqlQuery);
+                    if(foundError) return null;
                     break;
                 default:
                     error("Valid clause not found");
@@ -63,6 +77,7 @@ public class SQLParser implements Parser {
         if(!isSubQuery) {
             notify(sqlQuery);
         }
+        foundError = false;
         return sqlQuery;
     }
 
@@ -77,9 +92,9 @@ public class SQLParser implements Parser {
                 String[] aggregateFunction = next.split("[(,)]");
                 selectClause.addColumn(new Column(aggregateFunction[1], aggregateFunction[0]));
             } else if (!isKeyword && (next.matches("[a-z0-9_*]+") || next.matches("[a-z0-9_]+\\.[a-z0-9_]+\\.[a-z0-9_]+"))) {
-                selectClause.addColumn(new Column(next));
                 if(next.equals("*")) {
                     if(!validSelect) {
+                        selectClause.setStar(true);
                         validSelect = true;
                         break;
                     } else {
@@ -87,6 +102,7 @@ public class SQLParser implements Parser {
                         return;
                     }
                 }
+                selectClause.addColumn(new Column(next));
             } else {
                 listIterator.previous();
                 break;
@@ -304,6 +320,7 @@ public class SQLParser implements Parser {
 
     private void error(String message) {
         MainFrame.getInstance().getAppCore().getMessageGenerator().getMessage(message);
+        foundError = true;
     }
 
     @Override
