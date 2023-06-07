@@ -36,7 +36,7 @@ public class MainFrame extends JFrame implements ISubscriber {
         setLayout(new BorderLayout());
 
 
-        JTextArea textArea = new JTextArea(20, 50);  /// staviti jedan panel iza da izgleda lepo
+        JTextArea textArea = new JTextArea(15, 50);  /// staviti jedan panel iza da izgleda lepo
         JButton button = new JButton("Run");
         table = new JTable();
         JScrollPane scrollPane = new JScrollPane(table);
@@ -52,7 +52,6 @@ public class MainFrame extends JFrame implements ISubscriber {
         add(mainPanel, BorderLayout.CENTER);
         add(textArea, BorderLayout.NORTH);
 
-        add(scrollPane, BorderLayout.SOUTH);
 
         button.addActionListener(e -> {
             appCore.getParser().parse(textArea.getText(), false);

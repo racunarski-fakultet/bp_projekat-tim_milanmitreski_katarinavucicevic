@@ -1,6 +1,7 @@
 package gui.table;
 
 import data.Row;
+import gui.MainFrame;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
@@ -13,18 +14,23 @@ public class TableModel extends DefaultTableModel {
 
     private void updateModel(){
 
-        Vector columnVector = new Vector(rows.get(0).getFields().keySet());
-        Vector dataVector = new Vector();
+        if(!rows.isEmpty()) {
+            Vector columnVector = new Vector(rows.get(0).getFields().keySet());
+            Vector dataVector = new Vector();
 
-        for (Row row : rows) {
-            Vector rowVector = new Vector();
-            for (Object value : row.getFields().values()) {
-                rowVector.add(value);
+            for (Row row : rows) {
+                Vector rowVector = new Vector();
+                for (Object value : row.getFields().values()) {
+                    rowVector.add(value);
+                }
+                dataVector.add(rowVector);
             }
-            dataVector.add(rowVector);
-        }
 
-        setDataVector(dataVector, columnVector);
+            setDataVector(dataVector, columnVector);
+        } else {
+            MainFrame.getInstance().getAppCore().getMessageGenerator().getMessage("list of rows inseted is empty (could be a typo)");
+            return;
+        }
     }
 
     public void setRows(List<Row> rows) {

@@ -3,6 +3,7 @@ package gui.queryPanel;
 import com.mongodb.client.MongoCursor;
 import data.Row;
 import database.mongo.MongoConnection;
+import gui.MainFrame;
 import gui.table.TableModel;
 import observer.ISubscriber;
 import org.bson.Document;
@@ -13,8 +14,8 @@ import java.util.List;
 public class Packager implements ISubscriber {
 
     private TableModel filteredModel;
-
     private List<Row> rows;
+    private  boolean errorFlag = false;
 
     public Packager() {
         this.filteredModel = new TableModel();
@@ -33,6 +34,8 @@ public class Packager implements ISubscriber {
     @Override
     public void update(Object notification) {
 
+        errorFlag = false;
+
         rows = new ArrayList<>();
 
         MongoCursor<Document> cursor = (MongoCursor<Document>) notification;
@@ -47,18 +50,29 @@ public class Packager implements ISubscriber {
         cursor.close();
         MongoConnection.closeConnection();
 
-        List<String> columns = new ArrayList<>(documents.get(0).keySet());
-        for (Document document : documents) {
+        if(!documents.isEmpty()) {
+            List<String> columns = new ArrayList<>(documents.get(0).keySet());
 
-            Row row = new Row();
-            for (String column : columns) {
-                Object value = document.get(column);
+            for (Document document : documents) {
 
-                row.addField(column, value);
+                Row row = new Row();
+                for (String column : columns) {
+                    Object value = document.get(column);
+
+                    row.addField(column, value);
+                }
+
+                rows.add(row);
             }
-
-            rows.add(row);
+        } else {
+            MainFrame.getInstance().getAppCore().getMessageGenerator().getMessage("List of documents is empty (probably a typo)");
+            errorFlag = true;
+            return;
         }
 
+    }
+
+    public boolean isErrorFlag() {
+        return errorFlag;
     }
 }

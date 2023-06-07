@@ -31,7 +31,7 @@ public class MongoQuery implements Query{   /// executor
         } else {
             cursor = database.getCollection(table).find(Document.parse("{}")).projection(Document.parse("{}")).iterator();
         }
-        MongoConnection.closeConnection();
+        //MongoConnection.closeConnection();
 
         return cursor;
     }

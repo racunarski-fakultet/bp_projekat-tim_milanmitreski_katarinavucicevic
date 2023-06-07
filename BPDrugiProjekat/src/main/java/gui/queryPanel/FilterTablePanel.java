@@ -20,14 +20,19 @@ public class FilterTablePanel extends JFrame{
         JScrollPane newScrollPane = new JScrollPane(newTable);
         packager.setFilteredData();
 
-        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        if(!packager.isErrorFlag()) {
 
-        JPanel newPanel = new JPanel(new BorderLayout());
-        newPanel.add(newScrollPane, BorderLayout.CENTER);
+            this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        this.setContentPane(newPanel);
-        this.setSize(400, 300);
-        this.setVisible(true);
+            JPanel newPanel = new JPanel(new BorderLayout());
+            newPanel.add(newScrollPane, BorderLayout.CENTER);
+
+            this.setContentPane(newPanel);
+            this.setSize(400, 300);
+            this.setVisible(true);
+        } else {
+            dispose();
+        }
 
         MongoConnection.closeConnection();
     }

@@ -318,7 +318,7 @@ public class SQLParser implements Parser {
         return result.toString();
     }
 
-    private void error(String message) {
+    public void error(String message) {
         MainFrame.getInstance().getAppCore().getMessageGenerator().getMessage(message);
         foundError = true;
     }
