@@ -35,6 +35,7 @@ public class MainFrame extends JFrame implements ISubscriber {
 
 
         JTextArea textArea = new JTextArea(15, 50);  /// staviti jedan panel iza da izgleda lepo
+        textArea.setLineWrap(true);
         JButton button = new JButton("Run");
         table = new JTable();
         JScrollPane scrollPane = new JScrollPane(table);
